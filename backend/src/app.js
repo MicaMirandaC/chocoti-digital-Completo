@@ -21,7 +21,11 @@ const almacenesRoutes = require('./routes/almacenesRoutes');
 const app = express();
 
 // Seguridad HTTP con Helmet
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
 
 // Configuración de CORS
 const corsOrigins = process.env.CORS_ORIGIN
