@@ -25,7 +25,7 @@
 
   // 2. Si la página declara un rol requerido y el usuario tiene otro → redirigir al dashboard correcto
   if (rolRequerido && rolActual !== rolRequerido) {
-    const rutaCorrecta = API.resolverRutaDashboard(rolActual).replace('../', '../../');
+    const rutaCorrecta = API.resolverRutaDashboard(rolActual);
     window.location.replace(rutaCorrecta);
     return;
   }

@@ -10,7 +10,7 @@ const db = require('../config/database');
 
 class Usuario {
   /**
-   * Busca un usuario por email incluyendo password_hash para autenticación.
+   * Busca un usuario por email incluyendo password_hash y campos de seguridad.
    * @param {string} email
    * @returns {object|undefined}
    */
@@ -29,6 +29,10 @@ class Usuario {
           u.rol_id,
           u.almacen_id,
           u.estado,
+          u.intentos_fallidos,
+          u.bloqueado_hasta,
+          u.token_recuperacion,
+          u.token_expira_en,
           u.fecha_creacion,
           u.ultima_conexion,
           r.nombre AS rol,
@@ -42,7 +46,7 @@ class Usuario {
   }
 
   /**
-   * Busca un usuario por ID (sin password_hash).
+   * Busca un usuario por ID (sin password_hash ni datos sensibles).
    * @param {number} id
    * @returns {object|undefined}
    */
@@ -60,6 +64,8 @@ class Usuario {
           u.rol_id,
           u.almacen_id,
           u.estado,
+          u.intentos_fallidos,
+          u.bloqueado_hasta,
           u.fecha_creacion,
           u.ultima_conexion,
           r.nombre AS rol,
@@ -85,7 +91,8 @@ class Usuario {
           u.nombre_completo,
           u.email,
           u.password_hash,
-          u.estado
+          u.estado,
+          u.bloqueado_hasta
         FROM usuarios u
         WHERE u.id = ?`
       )
@@ -93,12 +100,134 @@ class Usuario {
   }
 
   /**
-   * Lista usuarios aplicando filtros opcionales.
+   * Incrementa el contador de intentos fallidos.
+   * Si alcanza 5 intentos, bloquea temporalmente la cuenta por 15 minutos.
+   * @param {number} id
+   * @returns {object} Estado actualizado de intentos y bloqueo
+   */
+  static incrementarIntentosFallidos(id) {
+    const usuario = db.prepare('SELECT intentos_fallidos FROM usuarios WHERE id = ?').get(id);
+    if (!usuario) return null;
+
+    const nuevosIntentos = (usuario.intentos_fallidos || 0) + 1;
+
+    if (nuevosIntentos >= 5) {
+      db.prepare(`
+        UPDATE usuarios
+        SET intentos_fallidos = ?,
+            bloqueado_hasta = datetime('now', '+15 minutes'),
+            estado = 'BLOQUEADO'
+        WHERE id = ?
+      `).run(nuevosIntentos, id);
+
+      return { intentos_fallidos: nuevosIntentos, bloqueado: true };
+    }
+
+    db.prepare('UPDATE usuarios SET intentos_fallidos = ? WHERE id = ?').run(nuevosIntentos, id);
+    return { intentos_fallidos: nuevosIntentos, bloqueado: false };
+  }
+
+  /**
+   * Restablece el contador de intentos fallidos y desbloquea la cuenta.
+   * @param {number} id
+   */
+  static resetearIntentosFallidos(id) {
+    db.prepare(`
+      UPDATE usuarios
+      SET intentos_fallidos = 0,
+          bloqueado_hasta = NULL,
+          estado = CASE WHEN estado = 'BLOQUEADO' THEN 'ACTIVO' ELSE estado END
+      WHERE id = ?
+    `).run(id);
+  }
+
+  /**
+   * Almacena un token criptográfico de recuperación de contraseña con fecha de caducidad.
+   * @param {number} id
+   * @param {string} token
+   * @param {string} expiraEnIso
+   */
+  static guardarTokenRecuperacion(id, token, expiraEnIso) {
+    db.prepare(`
+      UPDATE usuarios
+      SET token_recuperacion = ?,
+          token_expira_en = ?
+      WHERE id = ?
+    `).run(token, expiraEnIso, id);
+  }
+
+  /**
+   * Busca un usuario por token de recuperación verificando que no haya caducado.
+   * @param {string} token
+   * @returns {object|undefined}
+   */
+  static findByTokenRecuperacion(token) {
+    return db
+      .prepare(
+        `SELECT
+          id, nombre_completo, email, estado, token_expira_en
+        FROM usuarios
+        WHERE token_recuperacion = ?
+          AND datetime(token_expira_en) > datetime('now')`
+      )
+      .get(token);
+  }
+
+  /**
+   * Restablece la contraseña mediante token de recuperación y limpia el token.
+   * @param {number} id
+   * @param {string} passwordHash
+   */
+  static restablecerPasswordConToken(id, passwordHash) {
+    db.prepare(`
+      UPDATE usuarios
+      SET password_hash = ?,
+          token_recuperacion = NULL,
+          token_expira_en = NULL,
+          intentos_fallidos = 0,
+          bloqueado_hasta = NULL,
+          estado = 'ACTIVO'
+      WHERE id = ?
+    `).run(passwordHash, id);
+  }
+
+  /**
+   * Registro público seguro de clientes: SOLO permite CLIENTE_MINORISTA (rol 3)
+   * o CLIENTE_CORPORATIVO (rol 4). Ignora cualquier rol privilegiado recibido.
+   * @param {object} datos
+   * @returns {object}
+   */
+  static createClientePublico(datos) {
+    const esCorporativo = String(datos.tipo_cliente).toUpperCase() === 'CORPORATIVO';
+    const rolId = esCorporativo ? 4 : 3; // 4 = CLIENTE_CORPORATIVO, 3 = CLIENTE_MINORISTA
+    const tipoCliente = esCorporativo ? 'CORPORATIVO' : 'MINORISTA';
+
+    const stmt = db.prepare(`
+      INSERT INTO usuarios
+        (nombre_completo, email, password_hash, ci_nit, telefono,
+         tipo_cliente, razon_social, rol_id, almacen_id, estado)
+      VALUES
+        (@nombre_completo, @email, @password_hash, @ci_nit, @telefono,
+         @tipo_cliente, @razon_social, @rol_id, NULL, 'ACTIVO')
+    `);
+
+    const info = stmt.run({
+      nombre_completo: datos.nombre_completo.trim(),
+      email: datos.email.trim().toLowerCase(),
+      password_hash: datos.password_hash,
+      ci_nit: datos.ci_nit ? datos.ci_nit.trim() : null,
+      telefono: datos.telefono ? datos.telefono.trim() : null,
+      tipo_cliente: tipoCliente,
+      razon_social: esCorporativo && datos.razon_social ? datos.razon_social.trim() : null,
+      rol_id: rolId,
+    });
+
+    return Usuario.findById(info.lastInsertRowid);
+  }
+
+  /**
+   * Lista usuarios aplicando filtros opcionales (Solo administradores).
    * @param {object} filtros
-   * @param {number} [filtros.rol_id]
-   * @param {number} [filtros.almacen_id]
-   * @param {string} [filtros.estado]
-   * @param {string} [filtros.tipo_cliente]
    * @returns {Array<object>}
    */
   static findAll(filtros = {}) {
@@ -154,9 +283,9 @@ class Usuario {
   }
 
   /**
-   * Inserta un nuevo usuario en la base de datos.
+   * Inserta un nuevo usuario (Uso administrativo).
    * @param {object} datos
-   * @returns {object} Usuario recién creado
+   * @returns {object}
    */
   static create(datos) {
     const stmt = db.prepare(`
@@ -224,7 +353,7 @@ class Usuario {
   }
 
   /**
-   * Inactiva lógicamente un usuario (baja lógica).
+   * Inactiva lógicamente un usuario.
    * @param {number} id
    * @returns {boolean}
    */
@@ -243,7 +372,7 @@ class Usuario {
   }
 
   /**
-   * Actualiza el campo de última conexión a la fecha actual.
+   * Actualiza la marca de última conexión.
    * @param {number} id
    */
   static actualizarUltimaConexion(id) {
@@ -251,7 +380,7 @@ class Usuario {
   }
 
   /**
-   * Retorna estadísticas agregadas de usuarios para el dashboard.
+   * Retorna estadísticas agregadas de usuarios.
    * @returns {object}
    */
   static obtenerEstadisticas() {

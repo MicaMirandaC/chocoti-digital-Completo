@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pago Cancelado — Chocolates Para Ti</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--color-bg,#faf7f2); }
+    .pp-card {
+      background:#fff; border-radius:16px; padding:48px 40px; max-width:480px; width:100%;
+      text-align:center; box-shadow:0 4px 32px rgba(0,0,0,.1);
+    }
+    .pp-icon  { font-size:4rem; margin-bottom:16px; }
+    .pp-title { font-size:1.5rem; font-weight:800; color:#b91c1c; margin-bottom:8px; }
+    .pp-sub   { font-size:0.95rem; color:#555; margin-bottom:24px; }
+    .pp-info  { background:#fff5f5; border:1px solid #fca5a5; border-radius:8px; padding:16px; margin-bottom:24px; font-size:.85rem; }
+    .btn-home {
+      display:inline-block; background:var(--color-primary,#6b2d0e); color:#fff;
+      padding:12px 32px; border-radius:8px; text-decoration:none; font-weight:700;
+    }
+  </style>
+</head>
+<body>
+  <div class="pp-card">
+    <div class="pp-icon">❌</div>
+    <div class="pp-title">Pago no completado</div>
+    <div class="pp-sub">El pago con PayPal fue cancelado o no pudo completarse.</div>
+
+    <div class="pp-info" id="ppInfo">
+      Tu pedido <b id="ppPedidoId">—</b> sigue registrado como <b>pendiente</b>.<br>
+      Puedes intentar nuevamente desde el inicio o elegir otro método de pago.<br>
+      El inventario permanecerá reservado mientras dure el plazo de tu pedido.
+    </div>
+
+    <a href="/" class="btn-home">🏠 Volver al inicio</a>
+  </div>
+
+  <script>
+    (function () {
+      const params  = new URLSearchParams(location.search);
+      const pidEl   = document.getElementById('ppPedidoId');
+      const infoEl  = document.getElementById('ppInfo');
+      const pedidoId = params.get('pedidoId');
+      const errorMsg = params.get('error');
+
+      if (pidEl && pedidoId) pidEl.textContent = pedidoId;
+      if (errorMsg && infoEl) {
+        infoEl.innerHTML += `<br><br><span style="color:#b91c1c;font-size:.8rem">Detalle técnico: ${errorMsg}</span>`;
+      }
+    })();
+  </script>
+</body>
+</html>

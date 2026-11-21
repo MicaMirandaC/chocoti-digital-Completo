@@ -1,6 +1,6 @@
 /**
  * @file controllers/authController.js
- * @description Controlador HTTP para endpoints de autenticación y perfil de usuario.
+ * @description Controlador HTTP para endpoints de autenticación, registro y recuperación.
  * ChocoTi-Digital | Capa 1: Controladores y Transporte HTTP
  */
 
@@ -44,6 +44,7 @@ async function login(req, res, next) {
 
     return res.status(200).json({
       ok: true,
+      mensaje: 'Inicio de sesión exitoso.',
       token: resultado.token,
       usuario: resultado.usuario,
     });
@@ -59,8 +60,111 @@ async function login(req, res, next) {
 }
 
 /**
+ * POST /api/auth/register
+ * Registro público para Clientes Minoristas y Corporativos.
+ */
+async function register(req, res, next) {
+  const errores = validationResult(req);
+  if (!errores.isEmpty()) {
+    return res.status(422).json({
+      ok: false,
+      mensaje: 'Datos de registro incompletos o inválidos.',
+      errores: errores.array(),
+    });
+  }
+
+  try {
+    const ip = obtenerIp(req);
+    const resultado = await AuthService.register({
+      ...req.body,
+      ip,
+    });
+
+    return res.status(201).json({
+      ok: true,
+      mensaje: 'Cuenta registrada exitosamente.',
+      token: resultado.token,
+      usuario: resultado.usuario,
+    });
+  } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({
+        ok: false,
+        mensaje: err.message,
+      });
+    }
+    return next(err);
+  }
+}
+
+/**
+ * POST /api/auth/recuperar-password
+ * Emite token de recuperación y envía instrucciones por correo.
+ */
+async function recuperarPassword(req, res, next) {
+  const errores = validationResult(req);
+  if (!errores.isEmpty()) {
+    return res.status(422).json({
+      ok: false,
+      mensaje: 'Ingrese un correo electrónico válido.',
+      errores: errores.array(),
+    });
+  }
+
+  try {
+    const { email } = req.body;
+    const ip = obtenerIp(req);
+    const resultado = await AuthService.recuperarPassword({ email, ip });
+
+    return res.status(200).json({
+      ok: true,
+      mensaje: resultado.mensaje,
+    });
+  } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({ ok: false, mensaje: err.message });
+    }
+    return next(err);
+  }
+}
+
+/**
+ * POST /api/auth/restablecer-password
+ * Restablece la contraseña tras validar el token de recuperación.
+ */
+async function restablecerPassword(req, res, next) {
+  const errores = validationResult(req);
+  if (!errores.isEmpty()) {
+    return res.status(422).json({
+      ok: false,
+      mensaje: 'Datos para restablecer contraseña inválidos.',
+      errores: errores.array(),
+    });
+  }
+
+  try {
+    const { token, password_nueva, password_confirmar } = req.body;
+    const resultado = await AuthService.restablecerPassword({
+      token,
+      password_nueva,
+      password_confirmar,
+    });
+
+    return res.status(200).json({
+      ok: true,
+      mensaje: resultado.mensaje,
+    });
+  } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({ ok: false, mensaje: err.message });
+    }
+    return next(err);
+  }
+}
+
+/**
  * GET /api/auth/me
- * Retorna los datos del usuario autenticado actual.
+ * Retorna el perfil del usuario autenticado actual.
  */
 function getMe(req, res, next) {
   try {
@@ -99,7 +203,7 @@ function updatePerfil(req, res, next) {
 
 /**
  * PUT /api/auth/password
- * Cambia la contraseña del usuario autenticado verificando la contraseña previa.
+ * Cambia la contraseña del usuario autenticado verificando la clave previa.
  */
 async function cambiarPassword(req, res, next) {
   try {
@@ -118,6 +222,9 @@ async function cambiarPassword(req, res, next) {
 
 module.exports = {
   login,
+  register,
+  recuperarPassword,
+  restablecerPassword,
   getMe,
   updatePerfil,
   cambiarPassword,

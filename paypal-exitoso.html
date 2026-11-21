@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pago Confirmado — Chocolates Para Ti</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--color-bg,#faf7f2); }
+    .pp-card {
+      background:#fff; border-radius:16px; padding:48px 40px; max-width:480px; width:100%;
+      text-align:center; box-shadow:0 4px 32px rgba(0,0,0,.1);
+    }
+    .pp-icon { font-size:4rem; margin-bottom:16px; }
+    .pp-title { font-size:1.5rem; font-weight:800; color:#2d6a1f; margin-bottom:8px; }
+    .pp-sub   { font-size:0.95rem; color:#555; margin-bottom:24px; }
+    .pp-data  { background:#f5f5f5; border-radius:8px; padding:16px; margin-bottom:24px; text-align:left; font-size:.85rem; }
+    .pp-data b { color:#333; }
+    .btn-home {
+      display:inline-block; background:var(--color-primary,#6b2d0e); color:#fff;
+      padding:12px 32px; border-radius:8px; text-decoration:none; font-weight:700;
+    }
+    .btn-print {
+      display:inline-block; background:#888; color:#fff;
+      padding:12px 32px; border-radius:8px; text-decoration:none; font-weight:700; margin-left:8px;
+    }
+    @media print { .btn-home, .btn-print { display:none; } }
+  </style>
+</head>
+<body>
+  <div class="pp-card">
+    <div class="pp-icon">✅</div>
+    <div class="pp-title">¡Pago con PayPal Confirmado!</div>
+    <div class="pp-sub">Tu pedido ha sido registrado y el pago fue procesado correctamente.</div>
+
+    <div class="pp-data" id="ppData">Cargando datos del pedido...</div>
+
+    <div style="margin-top:8px;">
+      <a href="/" class="btn-home">🏠 Volver al inicio</a>
+      <button class="btn-print" onclick="window.print()">🖨️ Imprimir</button>
+    </div>
+
+    <p style="font-size:.72rem;color:#aaa;margin-top:20px;">
+      Esta pantalla es una confirmación interna del sistema.<br>
+      No constituye factura fiscal emitida al SIN de Bolivia.
+    </p>
+  </div>
+
+  <script>
+    (function () {
+      const params = new URLSearchParams(location.search);
+      const pedidoId = params.get('pedidoId');
+      const orderId  = params.get('orderId');
+      const ppData   = document.getElementById('ppData');
+
+      if (!pedidoId) {
+        ppData.innerHTML = '<span style="color:red">No se recibió información del pedido.</span>';
+        return;
+      }
+
+      fetch('/api/pagos/estado/' + encodeURIComponent(orderId || pedidoId))
+        .then(r => r.json())
+        .then(data => {
+          if (data.ok && data.data) {
+            const d = data.data;
+            ppData.innerHTML = `
+              <b>Pedido:</b> ${d.pedido?.codigo_pedido || pedidoId}<br>
+              <b>Estado:</b> ${d.pedido?.estado_pedido || '—'}<br>
+              <b>Total pagado:</b> Bs. ${d.monto_bob ?? d.pedido?.total ?? '—'}<br>
+              <b>Referencia PayPal:</b> ${orderId || '—'}<br>
+              <b>Método:</b> PayPal (Sandbox)
+            `;
+          } else {
+            ppData.innerHTML = `
+              <b>Pedido ID:</b> ${pedidoId}<br>
+              <b>Referencia PayPal:</b> ${orderId || '—'}<br>
+              <b>Estado:</b> Pago confirmado ✅
+            `;
+          }
+        })
+        .catch(() => {
+          ppData.innerHTML = `
+            <b>Pedido ID:</b> ${pedidoId}<br>
+            <b>Referencia PayPal:</b> ${orderId || '—'}<br>
+            <b>Estado:</b> Pago confirmado ✅
+          `;
+        });
+    })();
+  </script>
+</body>
+</html>

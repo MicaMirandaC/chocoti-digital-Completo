@@ -84,22 +84,82 @@
         </div>
       </section>
 
-      <!-- MIS PEDIDOS (placeholder) -->
+      <!-- MIS PEDIDOS (Módulo 7: Planilla real del cliente) -->
       <section class="panel-section" id="sec-pedidos">
         <div class="section-header">
           <div class="section-header__info">
             <h2 class="section-header__title">Mis Pedidos</h2>
             <p class="section-header__sub">Historial de tus compras en ChocoTi-Digital</p>
           </div>
+          <button class="btn no-print" id="btnExportarCSVCliente" style="background:#F5EFEB;border:1px solid #D4AF37;font-weight:600">⬇️ CSV</button>
         </div>
+
+        <!-- Filtros básicos -->
+        <div class="card mb-4 no-print">
+          <div class="card__body" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+            <div class="form-group" style="margin:0;min-width:150px">
+              <label class="form-label" for="filtCliEstPed">Estado</label>
+              <select class="form-input" id="filtCliEstPed">
+                <option value="">Todos</option>
+                <option>PENDIENTE_PAGO</option><option>PAGADO</option>
+                <option>EN_PREPARACION</option><option>LISTO_DESPACHO</option>
+                <option>EN_TRANSITO</option><option>ENTREGADO</option>
+                <option>FINALIZADO</option><option>CANCELADO</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;min-width:120px">
+              <label class="form-label" for="filtCliFechaIni">Desde</label>
+              <input class="form-input" type="date" id="filtCliFechaIni"/>
+            </div>
+            <div class="form-group" style="margin:0;min-width:120px">
+              <label class="form-label" for="filtCliFechaFin">Hasta</label>
+              <input class="form-input" type="date" id="filtCliFechaFin"/>
+            </div>
+            <button class="btn btn-primary" id="btnFiltrarPedidosCli" style="margin-top:4px">🔍 Filtrar</button>
+          </div>
+        </div>
+
+        <!-- Tabla -->
         <div class="card">
-          <div class="card__body">
-            <div class="empty-state">
-              <div class="empty-state__icon">📦</div>
-              <div class="empty-state__text">
-                <strong>Aún no tienes pedidos.</strong><br/>
-                <a href="../../../index.html" style="color:#D4AF37;font-weight:700">¡Explora el catálogo y realiza tu primera compra!</a>
-              </div>
+          <div class="card__body" style="padding:0;overflow-x:auto">
+            <table class="data-table" id="tablaCliPedidos">
+              <thead>
+                <tr>
+                  <th>N° Pedido</th>
+                  <th>Fecha</th>
+                  <th>Total (Bs.)</th>
+                  <th>Método</th>
+                  <th>Estado Pago</th>
+                  <th>Estado Pedido</th>
+                  <th>Entrega</th>
+                  <th class="no-print">Comprobante</th>
+                </tr>
+              </thead>
+              <tbody id="tablaCliPedidosCuerpo">
+                <tr><td colspan="8" class="text-center text-muted" style="padding:24px">Cargando tus pedidos…</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card__body no-print" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #EDE8E3">
+            <div id="plCliInfoPag" style="font-size:.85rem;color:#9A7B73"></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-sm" id="btnCliPrevPage" disabled>← Anterior</button>
+              <button class="btn btn-sm" id="btnCliNextPage" disabled>Siguiente →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Comprobante -->
+        <div class="modal-backdrop" id="backdropComprobanteCli" hidden>
+          <div class="modal" style="max-width:680px" role="dialog" aria-modal="true">
+            <div class="modal__header">
+              <h2 class="modal__title">📄 Nota de Venta</h2>
+              <button class="modal__close" id="btnCerrarComprobanteCli" aria-label="Cerrar">✕</button>
+            </div>
+            <div class="modal__body" id="cuerpoComprobanteCli"></div>
+            <div class="modal__footer no-print" style="display:flex;gap:10px;justify-content:flex-end">
+              <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir</button>
+              <button class="btn" id="btnCerrarComprobanteCli2">Cerrar</button>
             </div>
           </div>
         </div>
@@ -231,6 +291,158 @@ document.getElementById('btnRastrear')?.addEventListener('click', () => {
   if (!guia) return;
   window.open(`../../../index.html#rastreo`, '_blank');
 });
+
+/* ═══════════════════════════════════════
+   MÓDULO 7 — MIS PEDIDOS (CLIENTE)
+═══════════════════════════════════════ */
+(function () {
+  'use strict';
+  let cliPag = 1; const cliLim = 20; let cliTotalPags = 1;
+
+  function obtenerFiltrosCli() {
+    return {
+      estado_pedido: document.getElementById('filtCliEstPed')?.value  || '',
+      fecha_inicio:  document.getElementById('filtCliFechaIni')?.value || '',
+      fecha_fin:     document.getElementById('filtCliFechaFin')?.value  || '',
+      limite: cliLim, pagina: cliPag,
+    };
+  }
+
+  function estadoBadge(estado) {
+    const mapa = {
+      PENDIENTE_PAGO:'badge badge--warning',PAGADO:'badge badge--success',
+      EN_PREPARACION:'badge badge--info',LISTO_DESPACHO:'badge badge--info',
+      EN_TRANSITO:'badge badge--info',ENTREGADO:'badge badge--success',
+      FINALIZADO:'badge badge--success',CANCELADO:'badge badge--danger',EXPIRADO:'badge badge--danger',
+    };
+    return `<span class="${mapa[estado]||'badge'}">${estado}</span>`;
+  }
+
+  async function cargarPedidosCli(pag) {
+    if (pag) cliPag = pag;
+    const tbody = document.getElementById('tablaCliPedidosCuerpo');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted" style="padding:24px">Cargando…</td></tr>';
+    try {
+      const resp = await API.listarPlanilla(obtenerFiltrosCli());
+      cliTotalPags = resp.total_paginas || 1;
+      const info = document.getElementById('plCliInfoPag');
+      if (info) info.textContent = `${resp.total} pedido(s) · Pág. ${cliPag} de ${cliTotalPags}`;
+      const prev = document.getElementById('btnCliPrevPage');
+      const next = document.getElementById('btnCliNextPage');
+      if (prev) prev.disabled = cliPag <= 1;
+      if (next) next.disabled = cliPag >= cliTotalPags;
+
+      if (!resp.data || resp.data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted" style="padding:24px">
+          Aún no tienes pedidos. <a href="../../../index.html" style="color:#D4AF37;font-weight:700">¡Ir al catálogo!</a>
+        </td></tr>`;
+        return;
+      }
+      tbody.innerHTML = resp.data.map(p => {
+        const fecha   = p.created_at ? p.created_at.slice(0,10) : '—';
+        const entrega = p.tipo_entrega === 'RECOJO_AGENCIA' ? '🏪 Agencia' : '🚚 Domicilio';
+        return `<tr>
+          <td style="font-family:monospace;font-size:.82rem">${p.codigo_pedido}</td>
+          <td>${fecha}</td>
+          <td style="font-weight:700">Bs. ${Number(p.total).toFixed(2)}</td>
+          <td style="font-size:.8rem">${p.metodo_pago}</td>
+          <td>${estadoBadge(p.estado_pago)}</td>
+          <td>${estadoBadge(p.estado_pedido)}</td>
+          <td style="font-size:.8rem">${entrega}</td>
+          <td class="no-print">
+            <button class="btn btn-sm" style="font-size:.8rem;padding:4px 8px"
+              onclick="abrirComprobanteCli(${p.id})">🧾 Ver</button>
+          </td>
+        </tr>`;
+      }).join('');
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="color:#DC2626;padding:24px">Error: ${err.message}</td></tr>`;
+    }
+  }
+
+  window.abrirComprobanteCli = async function (id) {
+    const bd = document.getElementById('backdropComprobanteCli');
+    const cp = document.getElementById('cuerpoComprobanteCli');
+    if (!bd||!cp) return;
+    cp.innerHTML = '<p class="text-center text-muted" style="padding:24px">Cargando…</p>';
+    bd.hidden = false;
+    try {
+      const r = await API.obtenerComprobante(id);
+      if (!r.ok) throw new Error(r.mensaje||'Error');
+      const p = r.data; const em = r.empresa;
+      const fecha = p.created_at ? new Date(p.created_at).toLocaleString('es-BO') : '—';
+      const items = (p.detalles||[]).map(d=>`
+        <tr>
+          <td style="padding:4px 6px;font-size:.82rem">${d.sku}</td>
+          <td style="padding:4px 6px">${d.producto_nombre}</td>
+          <td style="text-align:center;padding:4px 6px">${d.cantidad}</td>
+          <td style="text-align:right;padding:4px 6px">Bs. ${Number(d.precio_unitario).toFixed(2)}</td>
+          <td style="text-align:right;padding:4px 6px;font-weight:700">Bs. ${Number(d.subtotal).toFixed(2)}</td>
+        </tr>`).join('');
+      cp.innerHTML = `
+        <div id="compCliPrint">
+          <div style="text-align:center;border-bottom:2px solid #2C1A1D;padding-bottom:10px;margin-bottom:14px">
+            <div style="font-size:1.3rem;font-weight:900;color:#2C1A1D">🍫 ${em.nombreComercial}</div>
+            <div style="font-size:.8rem;color:#666">${em.razonSocial} · ${em.ciudad}, ${em.pais}</div>
+            <div style="margin-top:6px;font-size:.72rem;background:#FFF9E6;border:1px solid #F5E5B8;border-radius:4px;padding:5px;color:#92400E">
+              ⚠️ ${r.advertencia_fiscal}
+            </div>
+          </div>
+          <div style="font-size:.85rem;margin-bottom:12px">
+            <strong>N° Pedido:</strong> ${p.codigo_pedido} &nbsp;·&nbsp;
+            <strong>Fecha:</strong> ${fecha}
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:12px">
+            <thead><tr style="background:#F5EFEB">
+              <th style="text-align:left;padding:6px;border-bottom:2px solid #DDD">SKU</th>
+              <th style="text-align:left;padding:6px;border-bottom:2px solid #DDD">Producto</th>
+              <th style="text-align:center;padding:6px;border-bottom:2px solid #DDD">Cant.</th>
+              <th style="text-align:right;padding:6px;border-bottom:2px solid #DDD">P. Unit.</th>
+              <th style="text-align:right;padding:6px;border-bottom:2px solid #DDD">Subtotal</th>
+            </tr></thead>
+            <tbody>${items}</tbody>
+          </table>
+          <div style="text-align:right;font-size:.9rem">
+            <div>Subtotal: <strong>Bs. ${Number(p.subtotal).toFixed(2)}</strong></div>
+            ${Number(p.costo_envio)>0?`<div>Envío: <strong>Bs. ${Number(p.costo_envio).toFixed(2)}</strong></div>`:''}
+            ${Number(p.descuento)>0?`<div style="color:#059669">Descuento: <strong>-Bs. ${Number(p.descuento).toFixed(2)}</strong></div>`:''}
+            <div style="font-size:1.1rem;font-weight:900;color:#2C1A1D;border-top:2px solid #2C1A1D;margin-top:6px;padding-top:4px">
+              TOTAL: Bs. ${Number(p.total).toFixed(2)}
+            </div>
+          </div>
+          <div style="font-size:.78rem;color:#9A7B73;text-align:center;margin-top:12px;border-top:1px solid #EDE8E3;padding-top:8px">
+            Impreso: ${new Date().toLocaleString('es-BO')} · ChocoTi-Digital
+          </div>
+        </div>`;
+    } catch(e) {
+      cp.innerHTML = `<p class="text-center" style="color:#DC2626;padding:24px">Error: ${e.message}</p>`;
+    }
+  };
+
+  document.getElementById('btnFiltrarPedidosCli')?.addEventListener('click', () => { cliPag=1; cargarPedidosCli(); });
+  document.getElementById('btnCliPrevPage')?.addEventListener('click', () => { if(cliPag>1) cargarPedidosCli(cliPag-1); });
+  document.getElementById('btnCliNextPage')?.addEventListener('click', () => { if(cliPag<cliTotalPags) cargarPedidosCli(cliPag+1); });
+  ['btnCerrarComprobanteCli','btnCerrarComprobanteCli2'].forEach(id=>{
+    document.getElementById(id)?.addEventListener('click',()=>{ document.getElementById('backdropComprobanteCli').hidden=true; });
+  });
+  document.getElementById('btnExportarCSVCliente')?.addEventListener('click', async ()=>{
+    try {
+      const f={estado_pedido:document.getElementById('filtCliEstPed')?.value||''};
+      const blob=await API.descargarPlanillaCSV(f);
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download='mis_pedidos.csv';
+      document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+    } catch(e){alert('Error CSV: '+e.message);}
+  });
+
+  // Cargar al entrar a la sección
+  document.querySelectorAll('[data-nav]').forEach(item => {
+    item.addEventListener('click', () => {
+      if (item.dataset.nav === 'sec-pedidos') cargarPedidosCli(1);
+    });
+  });
+})();
 </script>
 </body>
 </html>

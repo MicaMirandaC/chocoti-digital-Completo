@@ -87,6 +87,10 @@
   padding: 0;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 html {
   scroll-behavior: smooth;
   font-size: 16px;
@@ -2306,4 +2310,730 @@ h1, h2, h3, h4, h5 {
 
 .btn-banner-close:hover {
   opacity: 1;
+}
+
+/* ===========================================================
+   FASE 4: CATÁLOGO DINÁMICO, BUSCADOR, STOCK Y DESEOS
+   =========================================================== */
+
+/* ── Botón de Lista de Deseos en Header ── */
+.wishlist-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-full);
+  background: var(--color-ivory);
+  border: 1px solid var(--color-ivory-dark);
+  color: var(--color-cacao);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.wishlist-btn:hover {
+  background: #FFE8E8;
+  color: #E74C3C;
+  transform: scale(1.05);
+}
+
+.wishlist-btn svg {
+  width: 18px;
+  height: 18px;
+  transition: fill 0.2s ease;
+}
+
+.wishlist-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #E74C3C;
+  color: var(--color-white);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-cream);
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ── Buscador del Catálogo ── */
+.catalog__search-wrap {
+  position: relative;
+  max-width: 680px;
+  margin: 0 auto var(--space-8);
+}
+
+.catalog__search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--color-white);
+  border: 2px solid var(--color-ivory-dark);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+  padding: 6px 16px 6px 20px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.catalog__search-box:focus-within {
+  border-color: var(--color-gold);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.2);
+}
+
+.catalog__search-box svg.search-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+
+.catalog-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-cacao);
+  background: transparent;
+}
+
+.catalog-search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.search-clear-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 1.1rem;
+  line-height: 1;
+  border-radius: var(--radius-full);
+  transition: color var(--transition-fast);
+}
+
+.search-clear-btn:hover {
+  color: var(--color-error);
+}
+
+/* Sugerencias de búsqueda dropdown */
+.search-suggestions-box {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--color-ivory-dark);
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 100;
+  animation: fadeIn 0.2s ease;
+}
+
+.search-suggestion-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-ivory);
+  transition: background var(--transition-fast);
+}
+
+.search-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.search-suggestion-item:hover,
+.search-suggestion-item:focus {
+  background: var(--color-ivory);
+}
+
+.suggestion-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.suggestion-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-cacao);
+}
+
+.suggestion-sku {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.suggestion-price {
+  font-weight: 700;
+  color: var(--color-gold-dark);
+  font-size: var(--text-sm);
+}
+
+/* ── Tarjetas de Producto con Stock y Favorito ── */
+.product-card__image-wrap {
+  position: relative;
+  background: linear-gradient(135deg, var(--color-ivory) 0%, var(--color-ivory-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+}
+
+.product-card__sku {
+  font-size: 0.7rem;
+  font-family: monospace;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  background: rgba(44, 26, 29, 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-left: 6px;
+}
+
+.btn-wishlist-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-ivory-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: all 0.2s ease;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.btn-wishlist-toggle:hover {
+  transform: scale(1.15);
+  color: #E74C3C;
+}
+
+.btn-wishlist-toggle.active {
+  color: #E74C3C;
+  background: #FFF0F0;
+  border-color: #FFC0C0;
+}
+
+.btn-wishlist-toggle svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.2s ease;
+}
+
+.btn-wishlist-toggle.active svg {
+  fill: #E74C3C;
+}
+
+/* Semáforo de Stock */
+.badge-stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-top: 6px;
+  width: fit-content;
+}
+
+.badge-stock--disponible {
+  background: #E8F8F0;
+  color: #1E824C;
+  border: 1px solid #A3E4D7;
+}
+
+.badge-stock--pocas {
+  background: #FEF9E7;
+  color: #B7950B;
+  border: 1px solid #F9E79F;
+}
+
+.badge-stock--agotado {
+  background: #FDEDEC;
+  color: #C0392B;
+  border: 1px solid #FADBD8;
+}
+
+.product-card button.add-to-cart:disabled {
+  background: var(--color-ivory-dark);
+  color: var(--color-text-muted);
+  border-color: transparent;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Mensaje sin resultados */
+.catalog-empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--space-12) var(--space-4);
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  border: 1px dashed var(--color-ivory-dark);
+}
+
+.catalog-empty-state__icon {
+  font-size: 3.5rem;
+  margin-bottom: var(--space-3);
+}
+
+.catalog-empty-state__title {
+  font-size: var(--text-xl);
+  color: var(--color-cacao);
+  margin-bottom: var(--space-2);
+}
+
+.catalog-empty-state__desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* ── Modal de Lista de Deseos ── */
+.wishlist-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 26, 29, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  animation: fadeIn 0.25s ease;
+}
+
+.wishlist-dialog {
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  max-width: 580px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--shadow-2xl);
+  animation: slideUp 0.3s ease;
+}
+
+.wishlist-dialog__header {
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--color-ivory-dark);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-ivory);
+}
+
+.wishlist-dialog__title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--color-cacao);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wishlist-dialog__body {
+  padding: var(--space-5);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.wishlist-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-ivory);
+}
+
+.wishlist-item:last-child {
+  border-bottom: none;
+}
+
+.wishlist-item__info {
+  flex: 1;
+}
+
+.wishlist-item__name {
+  font-weight: 600;
+  color: var(--color-cacao);
+  font-size: var(--text-sm);
+}
+
+.wishlist-item__price {
+  font-weight: 700;
+  color: var(--color-gold-dark);
+  font-size: var(--text-sm);
+}
+
+.wishlist-item__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-remove-wishlist {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+
+.btn-remove-wishlist:hover {
+  color: var(--color-error);
+}
+
+/* ── Modal de Bienvenida con Redes Sociales ── */
+.welcome-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 26, 29, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  animation: fadeIn 0.3s ease;
+}
+
+.welcome-modal[hidden] {
+  display: none !important;
+}
+
+.welcome-dialog {
+  background: var(--color-cream);
+  border: 2px solid var(--color-gold);
+  border-radius: var(--radius-2xl);
+  max-width: 500px;
+  width: 100%;
+  padding: var(--space-8);
+  text-align: center;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: scaleUp 0.3s ease;
+}
+
+.welcome-dialog__icon {
+  font-size: 3.5rem;
+  margin-bottom: var(--space-3);
+}
+
+.welcome-dialog__title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  color: var(--color-cacao);
+  margin-bottom: var(--space-2);
+}
+
+.welcome-dialog__desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-mid);
+  line-height: 1.6;
+  margin-bottom: var(--space-6);
+}
+
+.welcome-social-btns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.btn-welcome-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.btn-welcome-social--fb {
+  background: #1877F2;
+  color: #FFF;
+}
+
+.btn-welcome-social--fb:hover {
+  background: #1464CA;
+  transform: translateY(-2px);
+}
+
+.btn-welcome-social--ig {
+  background: linear-gradient(45deg, #F09433 0%, #E6683C 25%, #DC2743 50%, #CC2366 75%, #BC1888 100%);
+  color: #FFF;
+}
+
+.btn-welcome-social--ig:hover {
+  opacity: 0.92;
+  transform: translateY(-2px);
+}
+
+.btn-welcome-social--wa {
+  background: #25D366;
+  color: #FFF;
+}
+
+.btn-welcome-social--wa:hover {
+  background: #1EBE5D;
+  transform: translateY(-2px);
+}
+
+.btn-welcome-close {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: underline;
+  transition: color var(--transition-fast);
+}
+
+.btn-welcome-close:hover {
+  color: var(--color-cacao);
+}
+
+/* ── Botón Flotante de WhatsApp ── */
+.floating-whatsapp-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 58px;
+  height: 58px;
+  border-radius: var(--radius-full);
+  background: #25D366;
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.4);
+  z-index: 999;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.floating-whatsapp-btn:hover {
+  background: #1EBE5D;
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+}
+
+.floating-whatsapp-btn svg {
+  width: 32px;
+  height: 32px;
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ============================================================
+   ESTILOS FASE 5A: CHECKOUT, MÉTODOS DE PAGO Y NOTA DE VENTA
+   ============================================================ */
+
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .checkout-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+}
+
+.checkout-delivery-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.checkout-delivery-opt.active {
+  border-color: var(--color-gold);
+  background: rgba(212, 175, 55, 0.08);
+  box-shadow: 0 0 0 1px var(--color-gold);
+}
+
+.checkout-payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: var(--space-2);
+}
+
+.payment-method-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.payment-method-card:hover {
+  border-color: var(--color-gold-light);
+}
+
+.payment-method-card.active {
+  border-color: var(--color-gold);
+  background: rgba(212, 175, 55, 0.08);
+  box-shadow: 0 0 0 1px var(--color-gold);
+}
+
+.payment-method-info {
+  flex: 1;
+}
+
+.payment-method-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+  margin-bottom: 2px;
+}
+
+.payment-method-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-mid);
+  line-height: 1.35;
+}
+
+.badge-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  border-radius: var(--radius-full);
+  background: var(--color-gold);
+  color: var(--color-cacao);
+  text-transform: uppercase;
+}
+
+.gateway-timer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid var(--color-gold);
+  font-size: var(--text-sm);
+  color: var(--color-cacao);
+  margin-bottom: var(--space-3);
+}
+
+.gateway-timer-badge strong {
+  font-family: monospace;
+  font-size: 1.15rem;
+  color: var(--color-primary);
+}
+
+.spinner-dot {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--color-gold);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Estilos de Impresión para Comprobante (Nota de Venta) ── */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #orderSuccessModal, #orderSuccessModal * {
+    visibility: visible;
+  }
+
+  #orderSuccessModal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    background: #FFF !important;
+  }
+
+  #orderSuccessModal .modal {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+  }
+
+  #btnSuccWhatsApp, #btnImprimirNotaVenta, #btnCerrarTodoExito,
+  header, footer, .floating-whatsapp-btn {
+    display: none !important;
+  }
+
+  #orderSuccessModal::before {
+    content: "SOLUR S.R.L. · Chocolates Para Ti · Sucre, Bolivia\A NOTA DE VENTA INTERNA (NO VÁLIDA COMO FACTURA FISCAL SIN)\A";
+    white-space: pre-wrap;
+    display: block;
+    font-size: 14pt;
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 2px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+  }
 }

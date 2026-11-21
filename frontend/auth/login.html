@@ -3,24 +3,44 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="Iniciar sesión — ChocoTi-Digital, Chocolates Para Ti"/>
-  <title>Iniciar Sesión | ChocoTi-Digital</title>
+  <meta name="description" content="Acceso y Registro — ChocoTi-Digital, Chocolates Para Ti"/>
+  <title>Acceso y Registro | ChocoTi-Digital</title>
+  
+  <!-- Tipografía Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  
+  <!-- Estilos de Notificaciones Toast -->
+  <link rel="stylesheet" href="../shared/css/toasts.css"/>
+
   <style>
-    /* ── Variables ── */
     :root {
-      --cacao: #2C1A1D; --cacao-mid: #3D2314;
-      --gold: #D4AF37;  --gold-dark: #B8941F; --gold-light: #F0D780;
-      --cream: #FDFBF7; --ivory: #F5EFEB; --ivory-dark: #E8DDD5;
-      --white: #FFFFFF; --danger: #DC2626; --success: #16A34A;
+      --cacao: #2C1A1D;
+      --cacao-mid: #3D2314;
+      --cacao-light: #5C3D35;
+      --gold: #D4AF37;
+      --gold-dark: #B8941F;
+      --gold-light: #F0D780;
+      --cream: #FDFBF7;
+      --ivory: #F5EFEB;
+      --ivory-dark: #E8DDD5;
+      --white: #FFFFFF;
+      --danger: #DC2626;
+      --success: #16A34A;
+      --warning: #D97706;
       --font-display: 'Playfair Display', Georgia, serif;
-      --font-body: 'Inter', system-ui, sans-serif;
-      --radius-md: 10px; --radius-lg: 16px; --radius-full: 9999px;
+      --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
       --shadow-lg: 0 20px 50px rgba(44,26,29,.22);
-      --t-base: 250ms ease;
+      --t-base: 200ms ease;
     }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: var(--font-body);
       background: linear-gradient(135deg, var(--cacao) 0%, var(--cacao-mid) 50%, #4A2C1A 100%);
@@ -28,113 +48,133 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 24px 16px;
       position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
+      color: var(--cacao);
     }
-    /* Formas decorativas */
+
+    /* Formas decorativas sutiles */
     body::before, body::after {
       content: '';
       position: absolute;
       border-radius: 50%;
-      background: rgba(212,175,55,.06);
+      background: rgba(212,175,55,.05);
       pointer-events: none;
     }
     body::before { width: 600px; height: 600px; top: -150px; right: -100px; }
-    body::after  { width: 300px; height: 300px; bottom: -80px; left: -60px;  }
+    body::after  { width: 350px; height: 350px; bottom: -80px; left: -60px; }
 
-    /* ── CARD DE LOGIN ── */
-    .login-card {
+    /* Contenedor Principal */
+    .auth-card {
       background: var(--white);
       border-radius: var(--radius-lg);
-      padding: 40px 36px;
+      padding: 36px 32px;
       width: 100%;
-      max-width: 420px;
+      max-width: 460px;
       box-shadow: var(--shadow-lg);
       position: relative;
       z-index: 1;
-      animation: cardIn .4s ease;
+      animation: cardIn .35s ease;
     }
     @keyframes cardIn {
-      from { transform: translateY(24px); opacity: 0; }
+      from { transform: translateY(20px); opacity: 0; }
       to   { transform: none; opacity: 1; }
     }
 
-    /* ── LOGO ── */
-    .login-logo {
+    /* Logo Institucional */
+    .auth-logo {
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
-    .login-logo__icon { font-size: 3rem; display: block; margin-bottom: 8px; }
-    .login-logo__brand {
+    .auth-logo__icon { font-size: 2.8rem; display: block; margin-bottom: 6px; }
+    .auth-logo__brand {
       font-family: var(--font-display);
-      font-size: 1.3rem;
+      font-size: 1.35rem;
       font-weight: 900;
       color: var(--cacao);
       display: block;
       line-height: 1.1;
     }
-    .login-logo__sub {
+    .auth-logo__sub {
       font-size: .75rem;
       color: var(--gold-dark);
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: .08em;
       text-transform: uppercase;
       display: block;
       margin-top: 4px;
     }
 
-    /* ── TÍTULO ── */
-    .login-title {
-      font-family: var(--font-display);
-      font-size: 1.5rem;
-      color: var(--cacao);
-      margin-bottom: 6px;
-    }
-    .login-sub { font-size: .875rem; color: #9A7B73; margin-bottom: 24px; }
-
-    /* ── ALERTAS ── */
-    .alert {
+    /* Navegación por Pestañas */
+    .auth-tabs {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
+      background: var(--ivory);
       border-radius: var(--radius-md);
-      font-size: .875rem;
-      margin-bottom: 16px;
-      border-left: 4px solid;
-      animation: alertIn .2s ease;
+      padding: 4px;
+      margin-bottom: 24px;
+      gap: 4px;
     }
-    @keyframes alertIn { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform: none; } }
-    .alert-danger  { background: rgba(220,38,38,.08);  color: #991B1B; border-color: var(--danger);  }
-    .alert-success { background: rgba(22,163,74,.08);  color: #166534; border-color: var(--success); }
-    .alert[hidden] { display: none; }
+    .auth-tab-btn {
+      flex: 1;
+      padding: 10px 8px;
+      border: none;
+      background: transparent;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--cacao-light);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--t-base);
+      text-align: center;
+    }
+    .auth-tab-btn.active {
+      background: var(--white);
+      color: var(--cacao);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
 
-    /* ── FORM ── */
-    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-    .form-label { font-size: .8rem; font-weight: 600; color: var(--cacao); }
+    /* Formularios */
+    .auth-pane { display: none; }
+    .auth-pane.active { display: block; animation: paneIn .25s ease; }
+    @keyframes paneIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .form-group {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--cacao);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
     .input-wrap { position: relative; }
+
     .form-input {
       width: 100%;
-      padding: .75rem 1rem;
-      border: 2px solid var(--ivory-dark);
+      padding: 11px 14px;
+      border: 1.5px solid var(--ivory-dark);
       border-radius: var(--radius-md);
-      font-size: .9rem;
+      font-size: 0.92rem;
       font-family: var(--font-body);
       color: var(--cacao);
-      background: var(--ivory);
+      background: var(--cream);
       transition: border-color var(--t-base), box-shadow var(--t-base);
-      appearance: none;
     }
     .form-input:focus {
       outline: none;
       border-color: var(--gold);
       background: var(--white);
-      box-shadow: 0 0 0 3px rgba(212,175,55,.15);
+      box-shadow: 0 0 0 3px rgba(212,175,55,.18);
     }
-    .form-input.error { border-color: var(--danger); }
-    .form-error { font-size: .75rem; color: var(--danger); font-weight: 500; display: none; }
-    .form-error.visible { display: block; }
+    .form-input.error { border-color: var(--danger); background: #FFF5F5; }
+    .form-input.success { border-color: var(--success); }
 
     .toggle-pass {
       position: absolute;
@@ -145,321 +185,699 @@
       border: none;
       cursor: pointer;
       color: #9A7B73;
-      font-size: .9rem;
+      font-size: 1rem;
       padding: 4px;
-      transition: color var(--t-base);
       line-height: 1;
     }
     .toggle-pass:hover { color: var(--cacao); }
 
-    /* ── BOTÓN LOGIN ── */
-    .btn-login {
+    .field-hint {
+      font-size: 0.75rem;
+      color: #7A635D;
+    }
+    .field-error {
+      font-size: 0.75rem;
+      color: var(--danger);
+      font-weight: 500;
+      display: none;
+    }
+    .field-error.visible { display: block; }
+
+    /* Indicador de Fortaleza de Contraseña */
+    .strength-meter {
+      height: 4px;
+      background: var(--ivory-dark);
+      border-radius: var(--radius-full);
+      margin-top: 6px;
+      overflow: hidden;
+      display: flex;
+    }
+    .strength-meter__bar {
+      height: 100%;
+      width: 0%;
+      transition: width .3s ease, background-color .3s ease;
+    }
+    .strength-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-top: 4px;
+      display: flex;
+      justify-content: space-between;
+      color: #7A635D;
+    }
+
+    /* Checkbox y Enlaces */
+    .form-row-check {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      margin-bottom: 20px;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      color: var(--cacao-light);
+    }
+    .checkbox-label input {
+      accent-color: var(--gold);
+      width: 15px;
+      height: 15px;
+    }
+    .link-action {
+      color: var(--gold-dark);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .link-action:hover { text-decoration: underline; }
+
+    /* Botón de Envío */
+    .btn-submit {
       width: 100%;
-      padding: .85rem;
+      padding: 13px;
       background: var(--cacao);
       color: var(--white);
       border: none;
       border-radius: var(--radius-full);
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 700;
-      font-family: var(--font-body);
       cursor: pointer;
       transition: all var(--t-base);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      margin-top: 8px;
     }
-    .btn-login:hover:not(:disabled) { background: var(--cacao-mid); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(44,26,29,.25); }
-    .btn-login:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+    .btn-submit:hover:not(:disabled) {
+      background: var(--cacao-mid);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(44,26,29,.25);
+    }
+    .btn-submit:disabled { opacity: 0.65; cursor: not-allowed; }
 
-    .spinner {
-      width: 18px; height: 18px;
-      border: 2px solid rgba(255,255,255,.4);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin .6s linear infinite;
+    /* Alerta de Error en el Formulario */
+    .form-alert {
+      padding: 11px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      margin-bottom: 16px;
       display: none;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .btn-login.loading .spinner { display: block; }
-    .btn-login.loading .btn-text { display: none; }
+    .form-alert--error {
+      background: #FEE2E2;
+      border: 1px solid #FCA5A5;
+      color: #991B1B;
+    }
+    .form-alert--success {
+      background: #DCFCE7;
+      border: 1px solid #86EFAC;
+      color: #166534;
+    }
+    .form-alert.visible { display: block; }
 
-    /* ── INFO BOX DE CREDENCIALES ── */
-    .creds-toggle {
-      text-align: center;
-      margin-top: 20px;
-    }
-    .creds-toggle button {
-      font-size: .78rem;
-      color: var(--gold-dark);
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-      background: none;
-      border: none;
-      font-family: inherit;
-    }
-    .creds-box {
-      margin-top: 12px;
-      background: var(--ivory);
-      border: 1px solid var(--ivory-dark);
-      border-radius: var(--radius-md);
-      padding: 14px;
-      font-size: .78rem;
-      color: #5C3D35;
-    }
-    .creds-box[hidden] { display: none; }
-    .creds-box table { width: 100%; border-collapse: collapse; }
-    .creds-box td { padding: 3px 6px; }
-    .creds-box td:first-child { font-weight: 600; color: var(--cacao); white-space: nowrap; }
-    .creds-box tr { cursor: pointer; border-radius: 4px; }
-    .creds-box tr:hover td { background: rgba(212,175,55,.10); }
-    .creds-box caption { font-weight: 700; color: var(--cacao); margin-bottom: 8px; display: block; text-align: left; }
-
-    .link-forgot {
-      display: block;
-      text-align: right;
-      font-size: .78rem;
-      color: var(--gold-dark);
-      margin-top: -8px;
+    /* Selector de Tipo de Cliente (Registro) */
+    .tipo-cliente-selector {
+      display: flex;
+      gap: 12px;
       margin-bottom: 16px;
-      font-weight: 600;
     }
-    .link-forgot:hover { text-decoration: underline; }
+    .tipo-card {
+      flex: 1;
+      border: 1.5px solid var(--ivory-dark);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all var(--t-base);
+    }
+    .tipo-card input { display: none; }
+    .tipo-card.selected {
+      border-color: var(--gold);
+      background: rgba(212,175,55,0.08);
+    }
+    .tipo-card__title { font-size: 0.82rem; font-weight: 700; display: block; }
+    .tipo-card__desc { font-size: 0.7rem; color: #7A635D; }
 
-    .login-footer {
+    /* Pie de página */
+    .auth-footer {
       text-align: center;
       margin-top: 24px;
-      font-size: .75rem;
-      color: #9A7B73;
+      font-size: 0.78rem;
+      color: #8C736C;
     }
-    .login-footer a { color: var(--cacao); font-weight: 600; }
-    .login-footer a:hover { text-decoration: underline; }
-
-    @media (max-width: 480px) {
-      .login-card { padding: 28px 20px; }
-    }
+    .auth-footer a { color: var(--cacao); font-weight: 600; text-decoration: none; }
+    .auth-footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
 
-  <!-- Redirigir si ya está autenticado -->
-  <script src="../shared/js/api.js"></script>
-  <script>
-    if (API.estaAutenticado()) {
-      const sesion = API.obtenerSesion();
-      window.location.replace(API.resolverRutaDashboard(sesion.usuario?.rol));
-    }
-  </script>
+  <div class="auth-card" role="main">
 
-  <div class="login-card" role="main">
-
-    <!-- Logo -->
-    <div class="login-logo" aria-label="Chocolates Para Ti - ChocoTi-Digital">
-      <span class="login-logo__icon" aria-hidden="true">🍫</span>
-      <span class="login-logo__brand">Chocolates Para Ti</span>
-      <span class="login-logo__sub">ChocoTi-Digital · Sprint 1</span>
+    <!-- Logo Oficial -->
+    <div class="auth-logo">
+      <span class="auth-logo__icon" aria-hidden="true">🍫</span>
+      <span class="auth-logo__brand">Chocolates Para Ti</span>
+      <span class="auth-logo__sub">Portal Omnicanal ChocoTi-Digital</span>
     </div>
 
-    <h1 class="login-title">Bienvenido de vuelta</h1>
-    <p class="login-sub">Inicia sesión para acceder a tu panel</p>
-
-    <!-- Alerta de error/éxito -->
-    <div class="alert alert-danger" id="loginAlert" role="alert" hidden>
-      <span id="loginAlertMsg"></span>
-    </div>
-
-    <!-- Formulario de login -->
-    <form id="loginForm" novalidate>
-
-      <!-- Email -->
-      <div class="form-group">
-        <label class="form-label" for="email">Correo electrónico</label>
-        <input
-          class="form-input" type="email" id="email" name="email"
-          placeholder="tu@correo.com" autocomplete="email" required
-          aria-required="true"
-        />
-        <span class="form-error" id="emailError" role="alert"></span>
-      </div>
-
-      <!-- Contraseña -->
-      <div class="form-group">
-        <label class="form-label" for="password">Contraseña</label>
-        <div class="input-wrap">
-          <input
-            class="form-input" type="password" id="password" name="password"
-            placeholder="••••••••" autocomplete="current-password" required
-            aria-required="true"
-          />
-          <button type="button" class="toggle-pass" id="togglePass" aria-label="Mostrar u ocultar contraseña">
-            👁️
-          </button>
-        </div>
-        <span class="form-error" id="passwordError" role="alert"></span>
-      </div>
-
-      <a href="#" class="link-forgot">¿Olvidaste tu contraseña?</a>
-
-      <!-- Botón submit -->
-      <button type="submit" class="btn-login" id="loginBtn">
-        <div class="spinner" aria-hidden="true"></div>
-        <span class="btn-text">Iniciar Sesión</span>
+    <!-- Pestañas de Navegación -->
+    <div class="auth-tabs" role="tablist">
+      <button type="button" class="auth-tab-btn active" id="tabLogin" role="tab" aria-selected="true" data-target="paneLogin">
+        Iniciar Sesión
       </button>
-
-    </form>
-
-    <!-- Credenciales de prueba -->
-    <div class="creds-toggle">
-      <button type="button" id="toggleCreds">Ver credenciales de prueba</button>
+      <button type="button" class="auth-tab-btn" id="tabRegister" role="tab" aria-selected="false" data-target="paneRegister">
+        Crear Cuenta
+      </button>
+      <button type="button" class="auth-tab-btn" id="tabForgot" role="tab" aria-selected="false" data-target="paneForgot">
+        Recuperar Clave
+      </button>
     </div>
 
-    <div class="creds-box" id="credsBox" hidden>
-      <caption>Haz clic en una fila para auto-rellenar</caption>
-      <table>
-        <tr data-email="admin@chocolatesti.bo" data-pass="Admin2024!">
-          <td>👑 Admin</td>
-          <td>admin@chocolatesti.bo</td>
-          <td>Admin2024!</td>
-        </tr>
-        <tr data-email="operador.sucre@chocolatesti.bo" data-pass="Operador2024!">
-          <td>🏭 Op. Sucre</td>
-          <td>operador.sucre@chocolatesti.bo</td>
-          <td>Operador2024!</td>
-        </tr>
-        <tr data-email="operador.lapaz@chocolatesti.bo" data-pass="Operador2024!">
-          <td>🏢 Op. La Paz</td>
-          <td>operador.lapaz@chocolatesti.bo</td>
-          <td>Operador2024!</td>
-        </tr>
-        <tr data-email="cliente@gmail.com" data-pass="Cliente2024!">
-          <td>🛍️ Minorista</td>
-          <td>cliente@gmail.com</td>
-          <td>Cliente2024!</td>
-        </tr>
-        <tr data-email="empresa@acme.bo" data-pass="Empresa2024!">
-          <td>🏛️ Corporativo</td>
-          <td>empresa@acme.bo</td>
-          <td>Empresa2024!</td>
-        </tr>
-      </table>
+    <!-- Alerta General -->
+    <div class="form-alert" id="authAlert" role="alert"></div>
+
+    <!-- ========================================================
+         PESTAÑA 1: INICIO DE SESIÓN
+         ======================================================== -->
+    <div class="auth-pane active" id="paneLogin" role="tabpanel">
+      <form id="formLogin" novalidate autocomplete="on">
+        
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">Correo Electrónico</label>
+          <input class="form-input" type="email" id="loginEmail" placeholder="tu@correo.com" required autocomplete="email"/>
+          <span class="field-error" id="loginEmailErr">Ingrese un correo válido.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loginPass">Contraseña</label>
+          <div class="input-wrap">
+            <input class="form-input" type="password" id="loginPass" placeholder="••••••••" required autocomplete="current-password"/>
+            <button type="button" class="toggle-pass" data-target="loginPass" aria-label="Mostrar contraseña">👁️</button>
+          </div>
+          <span class="field-error" id="loginPassErr">Ingrese su contraseña.</span>
+        </div>
+
+        <div class="form-row-check">
+          <label class="checkbox-label">
+            <input type="checkbox" id="loginRecordar"/>
+            <span>Recordar mi sesión</span>
+          </label>
+          <a class="link-action" id="linkToForgot">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnLoginSubmit">
+          <span>Ingresar a ChocoTi</span>
+        </button>
+      </form>
     </div>
 
-    <p class="login-footer">
-      ¿Eres nuevo cliente?
-      <a href="../../index.html">Ver catálogo ChocoTi-Digital →</a>
-    </p>
-  </div><!-- /login-card -->
+    <!-- ========================================================
+         PESTAÑA 2: REGISTRO PÚBLICO (MINORISTA / CORPORATIVO)
+         ======================================================== -->
+    <div class="auth-pane" id="paneRegister" role="tabpanel">
+      <form id="formRegister" novalidate autocomplete="off">
+        
+        <div class="tipo-cliente-selector">
+          <label class="tipo-card selected" id="optMinorista">
+            <input type="radio" name="tipo_cliente" value="MINORISTA" checked/>
+            <span class="tipo-card__title">🛍️ Minorista</span>
+            <span class="tipo-card__desc">Consumidor final</span>
+          </label>
+          <label class="tipo-card" id="optCorporativo">
+            <input type="radio" name="tipo_cliente" value="CORPORATIVO"/>
+            <span class="tipo-card__title">🏛️ Corporativo (B2B)</span>
+            <span class="tipo-card__desc">Empresas con NIT</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regNombre">Nombre Completo / Contacto</label>
+          <input class="form-input" type="text" id="regNombre" placeholder="Ej. Ana María Flores" required/>
+          <span class="field-error" id="regNombreErr">Mínimo 3 caracteres.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regEmail">Correo Electrónico</label>
+          <input class="form-input" type="email" id="regEmail" placeholder="tu@correo.com" required/>
+          <span class="field-error" id="regEmailErr">Correo inválido.</span>
+        </div>
+
+        <!-- Campos condicionales para Cliente Corporativo -->
+        <div id="fieldsCorporativo" style="display:none;">
+          <div class="form-group">
+            <label class="form-label" for="regRazonSocial">Razón Social de la Empresa</label>
+            <input class="form-input" type="text" id="regRazonSocial" placeholder="Ej. Distribuidora Los Andes S.R.L."/>
+            <span class="field-error" id="regRazonSocialErr">Razón social requerida para empresas.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="regNit">NIT (Número de Identificación Tributaria)</label>
+            <input class="form-input" type="text" id="regNit" placeholder="Ej. 1023456789"/>
+            <span class="field-error" id="regNitErr">NIT requerido para empresas.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regTelefono">Teléfono / WhatsApp (Opcional)</label>
+          <input class="form-input" type="tel" id="regTelefono" placeholder="Ej. 71234567"/>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regPass">Contraseña Segura</label>
+          <div class="input-wrap">
+            <input class="form-input" type="password" id="regPass" placeholder="••••••••" required autocomplete="new-password"/>
+            <button type="button" class="toggle-pass" data-target="regPass" aria-label="Mostrar contraseña">👁️</button>
+          </div>
+          <div class="strength-meter">
+            <div class="strength-meter__bar" id="strengthBar"></div>
+          </div>
+          <div class="strength-label">
+            <span id="strengthText">Fortaleza: Ingrese clave</span>
+            <span class="field-hint">Mín 8 car., 1 mayús., 1 minús., 1 núm.</span>
+          </div>
+          <span class="field-error" id="regPassErr">No cumple con las reglas de complejidad.</span>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnRegisterSubmit">
+          <span>Crear Mi Cuenta</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- ========================================================
+         PESTAÑA 3: RECUPERACIÓN / RESTABLECIMIENTO DE CLAVE
+         ======================================================== -->
+    <div class="auth-pane" id="paneForgot" role="tabpanel">
+      
+      <!-- Paso A: Solicitar enlace de recuperación -->
+      <form id="formForgotRequest" novalidate>
+        <p style="font-size:0.85rem;color:#6A524D;margin-bottom:16px;">
+          Ingrese el correo registrado con su cuenta. Le enviaremos un enlace seguro para restablecer su clave.
+        </p>
+        <div class="form-group">
+          <label class="form-label" for="forgotEmail">Correo Electrónico</label>
+          <input class="form-input" type="email" id="forgotEmail" placeholder="tu@correo.com" required/>
+          <span class="field-error" id="forgotEmailErr">Ingrese un correo válido.</span>
+        </div>
+        <button type="submit" class="btn-submit" id="btnForgotSubmit">
+          <span>Enviar Instrucciones</span>
+        </button>
+      </form>
+
+      <!-- Paso B: Restablecer contraseña con token activo (visible si token en URL) -->
+      <form id="formResetPass" style="display:none;" novalidate>
+        <p style="font-size:0.85rem;color:#6A524D;margin-bottom:16px;">
+          Ingrese y confirme su nueva contraseña de acceso.
+        </p>
+        <input type="hidden" id="resetToken"/>
+        <div class="form-group">
+          <label class="form-label" for="resetPass">Nueva Contraseña</label>
+          <div class="input-wrap">
+            <input class="form-input" type="password" id="resetPass" placeholder="••••••••" required/>
+            <button type="button" class="toggle-pass" data-target="resetPass" aria-label="Mostrar">👁️</button>
+          </div>
+          <span class="field-error" id="resetPassErr">Mínimo 8 caracteres con mayúscula, minúscula y número.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="resetPassConfirm">Confirmar Nueva Contraseña</label>
+          <div class="input-wrap">
+            <input class="form-input" type="password" id="resetPassConfirm" placeholder="••••••••" required/>
+            <button type="button" class="toggle-pass" data-target="resetPassConfirm" aria-label="Mostrar">👁️</button>
+          </div>
+          <span class="field-error" id="resetPassConfirmErr">Las contraseñas no coinciden.</span>
+        </div>
+        <button type="submit" class="btn-submit" id="btnResetSubmit">
+          <span>Restablecer Contraseña</span>
+        </button>
+      </form>
+
+    </div>
+
+    <!-- Pie del Panel -->
+    <div class="auth-footer">
+      <a href="../../index.html">← Volver a la Tienda Principal</a>
+    </div>
+
+  </div>
+
+  <!-- Scripts Compartidos: Toasts y API Client -->
+  <script src="../shared/js/toasts.js"></script>
+  <script src="../shared/js/api.js"></script>
 
   <script>
     'use strict';
-    /* ── Referencias DOM ── */
-    const form        = document.getElementById('loginForm');
-    const emailInput  = document.getElementById('email');
-    const passInput   = document.getElementById('password');
-    const loginBtn    = document.getElementById('loginBtn');
-    const alertEl     = document.getElementById('loginAlert');
-    const alertMsg    = document.getElementById('loginAlertMsg');
-    const togglePass  = document.getElementById('togglePass');
-    const toggleCreds = document.getElementById('toggleCreds');
-    const credsBox    = document.getElementById('credsBox');
 
-    /* ── Toggle visibilidad contraseña ── */
-    togglePass.addEventListener('click', () => {
-      const isText = passInput.type === 'text';
-      passInput.type    = isText ? 'password' : 'text';
-      togglePass.textContent = isText ? '👁️' : '🙈';
-    });
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Redirección si ya está autenticado
+      if (API.estaAutenticado()) {
+        const sesion = API.obtenerSesion();
+        window.location.replace(API.resolverRutaDashboard(sesion?.usuario?.rol));
+        return;
+      }
 
-    /* ── Toggle credenciales de prueba ── */
-    toggleCreds.addEventListener('click', () => {
-      credsBox.hidden = !credsBox.hidden;
-      toggleCreds.textContent = credsBox.hidden
-        ? 'Ver credenciales de prueba'
-        : 'Ocultar credenciales';
-    });
+      // 2. Control de Pestañas
+      const tabBtns = document.querySelectorAll('.auth-tab-btn');
+      const panes = document.querySelectorAll('.auth-pane');
+      const authAlert = document.getElementById('authAlert');
 
-    /* ── Auto-rellenar al hacer clic en fila de creds ── */
-    credsBox.querySelectorAll('tr').forEach(row => {
-      row.addEventListener('click', () => {
-        emailInput.value = row.dataset.email;
-        passInput.value  = row.dataset.pass;
-        credsBox.hidden  = true;
-        toggleCreds.textContent = 'Ver credenciales de prueba';
-        emailInput.focus();
+      function switchTab(targetId) {
+        tabBtns.forEach(b => {
+          const isSelected = b.dataset.target === targetId;
+          b.classList.toggle('active', isSelected);
+          b.setAttribute('aria-selected', String(isSelected));
+        });
+        panes.forEach(p => {
+          p.classList.toggle('active', p.id === targetId);
+        });
+        hideAlert();
+      }
+
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.target));
       });
-    });
 
-    /* ── Mostrar error ── */
-    function mostrarError(msg) {
-      alertMsg.textContent = msg;
-      alertEl.className = 'alert alert-danger';
-      alertEl.hidden    = false;
-    }
+      document.getElementById('linkToForgot')?.addEventListener('click', () => {
+        switchTab('paneForgot');
+      });
 
-    /* ── Limpiar error ── */
-    function limpiarError() { alertEl.hidden = true; }
-
-    /* ── Validación de campos ── */
-    function validar() {
-      let ok = true;
-      const emailErr = document.getElementById('emailError');
-      const passErr  = document.getElementById('passwordError');
-
-      emailErr.className = 'form-error';
-      passErr.className  = 'form-error';
-      emailInput.classList.remove('error');
-      passInput.classList.remove('error');
-
-      if (!emailInput.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
-        emailErr.textContent = 'Ingresa un correo electrónico válido.';
-        emailErr.className += ' visible';
-        emailInput.classList.add('error');
-        ok = false;
+      // 3. Alertas en Formulario
+      function showAlert(msg, isSuccess = false) {
+        authAlert.textContent = msg;
+        authAlert.className = `form-alert visible ${isSuccess ? 'form-alert--success' : 'form-alert--error'}`;
       }
-      if (!passInput.value || passInput.value.length < 6) {
-        passErr.textContent = 'La contraseña debe tener al menos 6 caracteres.';
-        passErr.className += ' visible';
-        passInput.classList.add('error');
-        ok = false;
+      function hideAlert() {
+        authAlert.className = 'form-alert';
+        authAlert.textContent = '';
       }
-      return ok;
-    }
 
-    /* ── Lógica de login ── */
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      limpiarError();
-      if (!validar()) return;
+      // 4. Mostrar / Ocultar Contraseña
+      document.querySelectorAll('.toggle-pass').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const input = document.getElementById(btn.dataset.target);
+          if (!input) return;
+          const isPass = input.type === 'password';
+          input.type = isPass ? 'text' : 'password';
+          btn.textContent = isPass ? '🔒' : '👁️';
+        });
+      });
 
-      loginBtn.disabled = true;
-      loginBtn.classList.add('loading');
+      // 5. Selector Minorista / Corporativo en Registro
+      const optMin = document.getElementById('optMinorista');
+      const optCorp = document.getElementById('optCorporativo');
+      const fieldsCorp = document.getElementById('fieldsCorporativo');
 
-      try {
-        const res = await API.login(emailInput.value.trim(), passInput.value);
+      optMin.addEventListener('click', () => {
+        optMin.classList.add('selected');
+        optCorp.classList.remove('selected');
+        fieldsCorp.style.display = 'none';
+      });
 
-        // Guardar sesión en localStorage
-        API.guardarSesion(res.token, res.usuario);
+      optCorp.addEventListener('click', () => {
+        optCorp.classList.add('selected');
+        optMin.classList.remove('selected');
+        fieldsCorp.style.display = 'block';
+      });
 
-        // Redirigir al dashboard según el rol
-        window.location.href = API.resolverRutaDashboard(res.usuario.rol);
+      // 6. Medidor de Fortaleza de Contraseña en Vivo
+      const regPass = document.getElementById('regPass');
+      const strengthBar = document.getElementById('strengthBar');
+      const strengthText = document.getElementById('strengthText');
 
-      } catch (err) {
-        const msg = err?.data?.mensaje || err.message || 'Error de conexión con el servidor.';
-        mostrarError('❌ ' + msg);
-        loginBtn.disabled = false;
-        loginBtn.classList.remove('loading');
-        passInput.value = '';
-        passInput.focus();
+      function checkComplexity(pass) {
+        let score = 0;
+        if (pass.length >= 8) score++;
+        if (/[A-Z]/.test(pass)) score++;
+        if (/[a-z]/.test(pass)) score++;
+        if (/\d/.test(pass)) score++;
+        if (/[!@#$%^&*(),.?":{}|<>]/.test(pass)) score++;
+        return score;
       }
-    });
 
-    /* ── Limpiar error al escribir ── */
-    [emailInput, passInput].forEach(inp => {
-      inp.addEventListener('input', limpiarError);
+      regPass.addEventListener('input', () => {
+        const val = regPass.value;
+        const score = checkComplexity(val);
+
+        if (!val) {
+          strengthBar.style.width = '0%';
+          strengthText.textContent = 'Fortaleza: Ingrese clave';
+          strengthBar.style.backgroundColor = 'transparent';
+          return;
+        }
+
+        if (score <= 2) {
+          strengthBar.style.width = '33%';
+          strengthBar.style.backgroundColor = '#DC2626';
+          strengthText.textContent = 'Fortaleza: Débil';
+        } else if (score === 3 || score === 4) {
+          strengthBar.style.width = '66%';
+          strengthBar.style.backgroundColor = '#D97706';
+          strengthText.textContent = 'Fortaleza: Media';
+        } else {
+          strengthBar.style.width = '100%';
+          strengthBar.style.backgroundColor = '#16A34A';
+          strengthText.textContent = 'Fortaleza: Fuerte';
+        }
+      });
+
+      // 7. Enlace con Token de Recuperación en URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenUrl = urlParams.get('token');
+      if (tokenUrl) {
+        switchTab('paneForgot');
+        document.getElementById('formForgotRequest').style.display = 'none';
+        document.getElementById('formResetPass').style.display = 'block';
+        document.getElementById('resetToken').value = tokenUrl;
+        Toast.info('Ingrese su nueva contraseña para completar el restablecimiento.');
+      }
+
+      // ========================================================
+      // SUBMIT: INICIO DE SESIÓN
+      // ========================================================
+      const formLogin = document.getElementById('formLogin');
+      formLogin.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideAlert();
+
+        const email = document.getElementById('loginEmail').value.trim();
+        const pass = document.getElementById('loginPass').value;
+        const recordar = document.getElementById('loginRecordar').checked;
+
+        let hasError = false;
+        if (!email || !email.includes('@')) {
+          document.getElementById('loginEmailErr').classList.add('visible');
+          hasError = true;
+        } else {
+          document.getElementById('loginEmailErr').classList.remove('visible');
+        }
+
+        if (!pass) {
+          document.getElementById('loginPassErr').classList.add('visible');
+          hasError = true;
+        } else {
+          document.getElementById('loginPassErr').classList.remove('visible');
+        }
+
+        if (hasError) return;
+
+        const btn = document.getElementById('btnLoginSubmit');
+        btn.disabled = true;
+        btn.textContent = 'Autenticando...';
+
+        try {
+          const resp = await API.login(email, pass);
+          API.guardarSesion(resp.token, resp.usuario, recordar);
+          Toast.success(`¡Bienvenido, ${resp.usuario.nombre_completo}!`);
+
+          setTimeout(() => {
+            window.location.replace(API.resolverRutaDashboard(resp.usuario.rol));
+          }, 800);
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = 'Ingresar a ChocoTi';
+          const msg = err.message || 'Correo o contraseña incorrectos.';
+          showAlert(msg);
+          Toast.error(msg);
+        }
+      });
+
+      // ========================================================
+      // SUBMIT: REGISTRO PÚBLICO
+      // ========================================================
+      const formRegister = document.getElementById('formRegister');
+      formRegister.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideAlert();
+
+        const nombre = document.getElementById('regNombre').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const pass = document.getElementById('regPass').value;
+        const telefono = document.getElementById('regTelefono').value.trim();
+        const esCorp = document.querySelector('input[name="tipo_cliente"]:checked')?.value === 'CORPORATIVO';
+        const razonSocial = document.getElementById('regRazonSocial').value.trim();
+        const nit = document.getElementById('regNit').value.trim();
+
+        let hasError = false;
+
+        if (nombre.length < 3) {
+          document.getElementById('regNombreErr').classList.add('visible');
+          hasError = true;
+        } else {
+          document.getElementById('regNombreErr').classList.remove('visible');
+        }
+
+        if (!email || !email.includes('@')) {
+          document.getElementById('regEmailErr').classList.add('visible');
+          hasError = true;
+        } else {
+          document.getElementById('regEmailErr').classList.remove('visible');
+        }
+
+        const regexComplejidad = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        if (!regexComplejidad.test(pass)) {
+          document.getElementById('regPassErr').classList.add('visible');
+          hasError = true;
+        } else {
+          document.getElementById('regPassErr').classList.remove('visible');
+        }
+
+        if (esCorp) {
+          if (!razonSocial) {
+            document.getElementById('regRazonSocialErr').classList.add('visible');
+            hasError = true;
+          } else {
+            document.getElementById('regRazonSocialErr').classList.remove('visible');
+          }
+          if (!nit) {
+            document.getElementById('regNitErr').classList.add('visible');
+            hasError = true;
+          } else {
+            document.getElementById('regNitErr').classList.remove('visible');
+          }
+        }
+
+        if (hasError) return;
+
+        const btn = document.getElementById('btnRegisterSubmit');
+        btn.disabled = true;
+        btn.textContent = 'Creando cuenta...';
+
+        try {
+          const resp = await API.register({
+            nombre_completo: nombre,
+            email,
+            password: pass,
+            tipo_cliente: esCorp ? 'CORPORATIVO' : 'MINORISTA',
+            razon_social: esCorp ? razonSocial : null,
+            ci_nit: esCorp ? nit : null,
+            telefono: telefono || null,
+          });
+
+          API.guardarSesion(resp.token, resp.usuario, true);
+          Toast.success('¡Cuenta registrada exitosamente!');
+
+          setTimeout(() => {
+            window.location.replace(API.resolverRutaDashboard(resp.usuario.rol));
+          }, 800);
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = 'Crear Mi Cuenta';
+          const msg = err.message || 'Error al registrar la cuenta.';
+          showAlert(msg);
+          Toast.error(msg);
+        }
+      });
+
+      // ========================================================
+      // SUBMIT: RECUPERAR CONTRASEÑA (SOLICITUD)
+      // ========================================================
+      const formForgot = document.getElementById('formForgotRequest');
+      formForgot.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideAlert();
+
+        const email = document.getElementById('forgotEmail').value.trim();
+        if (!email || !email.includes('@')) {
+          document.getElementById('forgotEmailErr').classList.add('visible');
+          return;
+        }
+        document.getElementById('forgotEmailErr').classList.remove('visible');
+
+        const btn = document.getElementById('btnForgotSubmit');
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+
+        try {
+          const resp = await API.recuperarPassword(email);
+          showAlert(resp.mensaje, true);
+          Toast.success(resp.mensaje);
+          formForgot.reset();
+        } catch (err) {
+          showAlert(err.message || 'Error en el servidor.');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Enviar Instrucciones';
+        }
+      });
+
+      // ========================================================
+      // SUBMIT: RESTABLECER CONTRASEÑA (CON TOKEN)
+      // ========================================================
+      const formReset = document.getElementById('formResetPass');
+      formReset.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideAlert();
+
+        const token = document.getElementById('resetToken').value;
+        const pass1 = document.getElementById('resetPass').value;
+        const pass2 = document.getElementById('resetPassConfirm').value;
+
+        const regexComplejidad = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        let hasError = false;
+
+        if (!regexComplejidad.test(pass1)) {
+          document.getElementById('resetPassErr').classList.add('visible');
+          hasError = true;
+        } else {
+          document.getElementById('resetPassErr').classList.remove('visible');
+        }
+
+        if (pass1 !== pass2) {
+          document.getElementById('resetPassConfirmErr').classList.add('visible');
+          hasError = true;
+        } else {
+          document.getElementById('resetPassConfirmErr').classList.remove('visible');
+        }
+
+        if (hasError) return;
+
+        const btn = document.getElementById('btnResetSubmit');
+        btn.disabled = true;
+        btn.textContent = 'Actualizando...';
+
+        try {
+          const resp = await API.restablecerPassword({
+            token,
+            password_nueva: pass1,
+            password_confirmar: pass2,
+          });
+
+          Toast.success(resp.mensaje);
+          showAlert(resp.mensaje, true);
+
+          setTimeout(() => {
+            switchTab('paneLogin');
+            formReset.style.display = 'none';
+            formForgot.style.display = 'block';
+          }, 1500);
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = 'Restablecer Contraseña';
+          showAlert(err.message || 'Token inválido o expirado.');
+          Toast.error(err.message);
+        }
+      });
     });
   </script>
 </body>

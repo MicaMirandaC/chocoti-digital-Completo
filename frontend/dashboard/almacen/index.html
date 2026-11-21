@@ -31,6 +31,9 @@
       <div class="nav-item" data-nav="sec-despachos">
         <span class="nav-icon">🚚</span> Despachos
       </div>
+      <div class="nav-item" data-nav="sec-planilla-op">
+        <span class="nav-icon">📊</span> Ventas de mi Almacén
+      </div>
       <span class="sidebar__section-label">Cuenta</span>
       <div class="nav-item" data-nav="sec-perfil">
         <span class="nav-icon">👤</span> Mi Perfil
@@ -86,23 +89,23 @@
         <div class="stats-grid">
           <div class="stat-card">
             <span class="stat-card__icon">📦</span>
-            <div class="stat-card__value">—</div>
-            <div class="stat-card__label">Pedidos hoy</div>
+            <div class="stat-card__value" id="statTotalItems">—</div>
+            <div class="stat-card__label">Items en catálogo</div>
           </div>
           <div class="stat-card">
             <span class="stat-card__icon">⚠️</span>
-            <div class="stat-card__value">—</div>
+            <div class="stat-card__value" id="statStockBajo">—</div>
             <div class="stat-card__label">Stock bajo alerta</div>
           </div>
           <div class="stat-card">
-            <span class="stat-card__icon">🚚</span>
-            <div class="stat-card__value">—</div>
-            <div class="stat-card__label">Despachos pendientes</div>
+            <span class="stat-card__icon">⏳</span>
+            <div class="stat-card__value" id="statVencimientos">—</div>
+            <div class="stat-card__label">Lotes próximos a vencer</div>
           </div>
           <div class="stat-card">
             <span class="stat-card__icon">✅</span>
-            <div class="stat-card__value">—</div>
-            <div class="stat-card__label">Completados hoy</div>
+            <div class="stat-card__value" id="statDisponibles">—</div>
+            <div class="stat-card__label">SKUs disponibles</div>
           </div>
         </div>
 
@@ -116,45 +119,180 @@
         </div>
       </section>
 
-      <!-- INVENTARIO (placeholder Sprint 2) -->
+      <!-- INVENTARIO OPERATIVO (FASE 4) -->
       <section class="panel-section" id="sec-inventario">
         <div class="section-header">
           <div class="section-header__info">
-            <h2 class="section-header__title">Inventario del Almacén</h2>
-            <p class="section-header__sub">Control de stock de chocolates y materiales</p>
+            <h2 class="section-header__title">Inventario y Stock Físico</h2>
+            <p class="section-header__sub">Control de existencias, reservas y trazabilidad FEFO</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="btnAbrirModalEntrada">
+              ➕ Registrar Entrada / Lote
+            </button>
+            <button class="btn" style="background:#FFF;border:1px solid #D4AF37;color:#2C1A1D;font-weight:600" id="btnAbrirModalAjuste">
+              ⚖️ Ajuste de Stock
+            </button>
           </div>
         </div>
-        <div class="card">
-          <div class="card__body">
-            <div class="empty-state">
-              <div class="empty-state__icon">📦</div>
-              <div class="empty-state__text">
-                <strong>Módulo disponible en Sprint 2</strong><br/>
-                Aquí podrás gestionar el inventario local de tu almacén:<br/>
-                stock de productos, alertas de bajo inventario y movimientos.
-              </div>
+
+        <!-- Alertas de stock crítico y vencimiento -->
+        <div class="card mb-4" id="cardAlertasInventario" style="display:none">
+          <div class="card__header" style="background:#FFF9E6;border-bottom:1px solid #F5E5B8">
+            <span class="card__title" style="color:#B7791F">⚠️ Alertas de Inventario para este Almacén</span>
+          </div>
+          <div class="card__body" id="contenedorAlertasBody">
+            <!-- Inyectado por JS -->
+          </div>
+        </div>
+
+        <!-- Filtros y buscador de tabla -->
+        <div class="card mb-4">
+          <div class="card__body" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <div style="flex:1;min-width:240px">
+              <input type="text" id="filtroInventarioTexto" class="form-input" placeholder="🔍 Buscar por SKU o nombre de producto..." />
             </div>
+            <div style="width:200px">
+              <select id="filtroInventarioEstado" class="form-input">
+                <option value="todos">Todos los estados</option>
+                <option value="Disponible">Disponible</option>
+                <option value="Pocas unidades">Pocas unidades</option>
+                <option value="Agotado">Agotado</option>
+              </select>
+            </div>
+            <button type="button" class="btn" id="btnRefrescarInventario" style="background:#F5EFEB;color:#2C1A1D">
+              🔄 Refrescar
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabla de existencias -->
+        <div class="card">
+          <div class="table-wrap">
+            <table class="data-table" id="tablaInventario">
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Producto</th>
+                  <th>Categoría</th>
+                  <th style="text-align:right">Stock Actual</th>
+                  <th style="text-align:right">Reservado</th>
+                  <th style="text-align:right">Disponible</th>
+                  <th style="text-align:center">Estado</th>
+                  <th style="text-align:center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyInventario">
+                <tr><td colspan="8" style="text-align:center;padding:24px">Cargando existencias del almacén...</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
 
       <!-- DESPACHOS (placeholder Sprint 2) -->
+     <!-- DESPACHOS -->
       <section class="panel-section" id="sec-despachos">
         <div class="section-header">
           <div class="section-header__info">
             <h2 class="section-header__title">Órdenes de Despacho</h2>
-            <p class="section-header__sub">Gestión de envíos desde este almacén</p>
+            <p class="section-header__sub">Gestión de pedidos y envíos asignados a tu almacén</p>
+          </div>
+          <button type="button" class="btn" id="btnRefrescarDespachos" style="background:#F5EFEB;color:#2C1A1D">
+            🔄 Refrescar
+          </button>
+        </div>
+        <div class="card">
+          <div class="card__body" style="padding:0;overflow-x:auto">
+            <table class="data-table" id="tablaOpDespachos">
+              <thead>
+                <tr>
+                  <th>N° Pedido</th>
+                  <th>Fecha</th>
+                  <th>Cliente</th>
+                  <th style="text-align:right">Total (Bs.)</th>
+                  <th>Estado Pago</th>
+                  <th>Estado Pedido</th>
+                  <th>Entrega</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tablaOpDespachosCuerpo">
+                <tr><td colspan="8" style="text-align:center;padding:24px">Cargando órdenes...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VENTAS DE MI ALMACÉN — Módulo 7 -->
+      <section class="panel-section" id="sec-planilla-op">
+        <div class="section-header">
+          <div class="section-header__info">
+            <h2 class="section-header__title">Ventas de mi Almacén</h2>
+            <p class="section-header__sub">Planilla de pedidos asignados a tu almacén</p>
+          </div>
+          <button class="btn no-print" id="btnExportarCSVOp" style="background:#F5EFEB;border:1px solid #D4AF37;font-weight:600">⬇️ CSV</button>
+        </div>
+        <div class="card mb-4 no-print">
+          <div class="card__body" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+            <div class="form-group" style="margin:0;min-width:150px">
+              <label class="form-label" for="filtOpEstPed">Estado</label>
+              <select class="form-input" id="filtOpEstPed">
+                <option value="">Todos</option>
+                <option>PENDIENTE_PAGO</option><option>PAGADO</option>
+                <option>EN_PREPARACION</option><option>LISTO_DESPACHO</option>
+                <option>EN_TRANSITO</option><option>ENTREGADO</option>
+                <option>FINALIZADO</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;min-width:120px">
+              <label class="form-label" for="filtOpFechaIni">Desde</label>
+              <input class="form-input" type="date" id="filtOpFechaIni"/>
+            </div>
+            <div class="form-group" style="margin:0;min-width:120px">
+              <label class="form-label" for="filtOpFechaFin">Hasta</label>
+              <input class="form-input" type="date" id="filtOpFechaFin"/>
+            </div>
+            <button class="btn btn-primary" id="btnFiltrarPedidosOp" style="margin-top:4px">🔍 Filtrar</button>
           </div>
         </div>
         <div class="card">
-          <div class="card__body">
-            <div class="empty-state">
-              <div class="empty-state__icon">🚚</div>
-              <div class="empty-state__text">
-                <strong>Módulo disponible en Sprint 2</strong><br/>
-                Aquí podrás ver y actualizar el estado de los pedidos<br/>
-                asignados a tu almacén para su despacho.
-              </div>
+          <div class="card__body" style="padding:0;overflow-x:auto">
+            <table class="data-table" id="tablaOpPedidos">
+              <thead>
+                <tr>
+                  <th>N° Pedido</th><th>Fecha</th><th>Cliente</th>
+                  <th style="text-align:right">Total (Bs.)</th>
+                  <th>Pago</th><th>Estado Pago</th><th>Estado Pedido</th>
+                  <th>Entrega</th><th class="no-print">Comprobante</th>
+                </tr>
+              </thead>
+              <tbody id="tablaOpPedidosCuerpo">
+                <tr><td colspan="9" class="text-center text-muted" style="padding:24px">Cargando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card__body no-print" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #EDE8E3">
+            <div id="plOpInfoPag" style="font-size:.85rem;color:#9A7B73"></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-sm" id="btnOpPrevPage" disabled>← Anterior</button>
+              <button class="btn btn-sm" id="btnOpNextPage" disabled>Siguiente →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Comprobante Operador -->
+        <div class="modal-backdrop" id="backdropComprobanteOp" hidden>
+          <div class="modal" style="max-width:680px" role="dialog" aria-modal="true">
+            <div class="modal__header">
+              <h2 class="modal__title">📄 Nota de Venta</h2>
+              <button class="modal__close" id="btnCerrarComprobanteOp" aria-label="Cerrar">✕</button>
+            </div>
+            <div class="modal__body" id="cuerpoComprobanteOp"></div>
+            <div class="modal__footer no-print" style="display:flex;gap:10px;justify-content:flex-end">
+              <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir</button>
+              <button class="btn" id="btnCerrarComprobanteOp2">Cerrar</button>
             </div>
           </div>
         </div>
@@ -209,11 +347,92 @@
   </div>
 </div>
 
+  <!-- MODAL: REGISTRAR ENTRADA / LOTE -->
+  <div class="modal-overlay" id="modalEntrada" hidden>
+    <div class="modal" style="max-width:500px">
+      <div class="modal__header">
+        <h3 class="modal__title">➕ Entrada de Mercadería / Lote</h3>
+        <button class="modal__close" id="btnCerrarModalEntrada">✕</button>
+      </div>
+      <div class="modal__body">
+        <div class="alert" id="alertaModalEntrada" hidden></div>
+        <form id="formEntradaInventario" class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="entradaProducto">Producto (SKU)</label>
+            <select class="form-input" id="entradaProducto" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="entradaCantidad">Cantidad a Ingresar</label>
+            <input type="number" class="form-input" id="entradaCantidad" min="1" required placeholder="Ej: 50" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="entradaLoteCodigo">Código de Lote</label>
+            <input type="text" class="form-input" id="entradaLoteCodigo" placeholder="Ej: LOT-2026-05" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="entradaFechaVence">Fecha de Vencimiento (FEFO)</label>
+            <input type="date" class="form-input" id="entradaFechaVence" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="entradaMotivo">Motivo o Justificación</label>
+            <input type="text" class="form-input" id="entradaMotivo" placeholder="Recepción de fábrica Sucre..." />
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:10px">
+            <button type="button" class="btn" style="background:#F5EFEB" id="btnCancelarModalEntrada">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="btnSubmitEntrada">💾 Guardar Entrada</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AJUSTE DE STOCK -->
+  <div class="modal-overlay" id="modalAjuste" hidden>
+    <div class="modal" style="max-width:500px">
+      <div class="modal__header">
+        <h3 class="modal__title">⚖️ Ajuste Manual de Inventario</h3>
+        <button class="modal__close" id="btnCerrarModalAjuste">✕</button>
+      </div>
+      <div class="modal__body">
+        <div class="alert" id="alertaModalAjuste" hidden></div>
+        <form id="formAjusteInventario" class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="ajusteProducto">Producto (SKU)</label>
+            <select class="form-input" id="ajusteProducto" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ajusteTipo">Tipo de Ajuste</label>
+            <select class="form-input" id="ajusteTipo" required>
+              <option value="positivo">➕ Incremento (+ stock)</option>
+              <option value="negativo">➖ Disminución / Merma / Rotura (- stock)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ajusteCantidad">Cantidad de Variación</label>
+            <input type="number" class="form-input" id="ajusteCantidad" min="1" required placeholder="Ej: 5" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ajusteMotivo">Motivo Obligatorio (Auditoría Kardex)</label>
+            <input type="text" class="form-input" id="ajusteMotivo" required placeholder="Rotura en manipulación / Conteo cíclico..." />
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:10px">
+            <button type="button" class="btn" style="background:#F5EFEB" id="btnCancelarModalAjuste">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="btnSubmitAjuste">💾 Aplicar Ajuste</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
 <script src="../../shared/js/api.js"></script>
 <script>window.ROL_REQUERIDO = 'OPERADOR_ALMACEN';</script>
 <script src="../../shared/js/auth-guard.js"></script>
 <script>
 'use strict';
+
+let inventarioLocal = [];
+let productosCatalogo = [];
+
 function showAlert(id, msg, tipo='danger') {
   const el = document.getElementById(id);
   if (!el) return;
@@ -244,6 +463,61 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('almacenSubtitulo').textContent = 'Sin almacén asignado';
   }
 
+  // Cargar catálogo de productos y llenar selects de modales
+  try {
+    const resProd = await API.listarProductos();
+    productosCatalogo = resProd.data || [];
+    poblarSelectsProductos(productosCatalogo);
+  } catch (err) {
+    console.error('Error cargando productos:', err);
+  }
+
+  // Cargar inventario, alertas, ventas de almacén y despachos
+  await cargarInventario();
+  await cargarAlertas();
+  await cargarVentasAlmacen(usuario);
+  await cargarDespachosAlmacen(usuario);
+
+  // Listeners de filtros, paginación, CSV, despachos y modal comprobante
+  document.getElementById('btnFiltrarPedidosOp')?.addEventListener('click', () => {
+    opPaginaActual = 1;
+    cargarVentasAlmacen(usuario);
+  });
+  document.getElementById('btnOpPrevPage')?.addEventListener('click', () => {
+    if (opPaginaActual > 1) {
+      opPaginaActual--;
+      cargarVentasAlmacen(usuario);
+    }
+  });
+  document.getElementById('btnOpNextPage')?.addEventListener('click', () => {
+    if (opPaginaActual < opTotalPaginas) {
+      opPaginaActual++;
+      cargarVentasAlmacen(usuario);
+    }
+  });
+  document.getElementById('btnExportarCSVOp')?.addEventListener('click', async () => {
+    try {
+      const blob = await API.Planilla.descargarCSV(getFiltrosPlanillaOp(usuario));
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ventas_almacen.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('❌ ' + (err?.data?.mensaje || err.message));
+    }
+  });
+  document.getElementById('btnRefrescarDespachos')?.addEventListener('click', () => {
+    cargarDespachosAlmacen(usuario);
+  });
+  document.getElementById('btnCerrarComprobanteOp')?.addEventListener('click', () => {
+    document.getElementById('backdropComprobanteOp').hidden = true;
+  });
+  document.getElementById('btnCerrarComprobanteOp2')?.addEventListener('click', () => {
+    document.getElementById('backdropComprobanteOp').hidden = true;
+  });
+
   // Cargar perfil
   try {
     const r = await API.getMe();
@@ -252,6 +526,401 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('pTelefono').value = u.telefono || '';
     document.getElementById('pCiNit').value    = u.ci_nit || '';
   } catch { /* silencioso */ }
+});
+
+function poblarSelectsProductos(prods) {
+  const sEntrada = document.getElementById('entradaProducto');
+  const sAjuste = document.getElementById('ajusteProducto');
+  if (!sEntrada || !sAjuste) return;
+
+  let opts = '<option value="">-- Seleccionar Producto --</option>';
+  prods.forEach(p => {
+    opts += `<option value="${p.id}">${p.sku} - ${p.nombre}</option>`;
+  });
+  sEntrada.innerHTML = opts;
+  sAjuste.innerHTML = opts;
+}
+
+async function cargarInventario() {
+  try {
+    const res = await API.consultarInventario();
+    inventarioLocal = res.items || [];
+    renderTablaInventario();
+    actualizarStats();
+  } catch (err) {
+    console.error('Error al cargar inventario:', err);
+    document.getElementById('tbodyInventario').innerHTML =
+      `<tr><td colspan="8" style="text-align:center;color:#C0392B;padding:20px">Error al cargar existencias.</td></tr>`;
+  }
+}
+
+let opPaginaActual = 1;
+const opLimitePagina = 10;
+let opTotalPaginas = 1;
+
+function getFiltrosPlanillaOp(usuario) {
+  return {
+    almacen_id: usuario?.almacen_id || '',
+    estado_pedido: document.getElementById('filtOpEstPed')?.value || '',
+    fecha_inicio: document.getElementById('filtOpFechaIni')?.value || '',
+    fecha_fin: document.getElementById('filtOpFechaFin')?.value || '',
+    pagina: opPaginaActual,
+    limite: opLimitePagina,
+  };
+}
+
+async function cargarVentasAlmacen(usuario) {
+  const tbody = document.getElementById('tablaOpPedidosCuerpo');
+  const infoPag = document.getElementById('plOpInfoPag');
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:24px">Cargando…</td></tr>`;
+
+  try {
+    const resp = await API.Planilla.listar(getFiltrosPlanillaOp(usuario));
+    const filas = resp?.data || resp?.pedidos || resp?.items || [];
+    opTotalPaginas = resp?.paginacion?.totalPaginas || resp?.totalPaginas || 1;
+
+    if (!Array.isArray(filas) || filas.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:24px;color:#9A7B73">No hay ventas registradas para los filtros seleccionados.</td></tr>`;
+      if (infoPag) infoPag.textContent = `Página ${opPaginaActual} de ${opTotalPaginas}`;
+      actualizarBotonesPagOp();
+      return;
+    }
+
+    tbody.innerHTML = filas.map((p) => {
+      const id = p.id || p.pedido_id;
+      const codigo = p.codigo || p.numero_pedido || `#${id}`;
+      const fecha = (p.fecha_creacion || p.created_at || '').toString().slice(0, 10);
+      const cliente = p.cliente_nombre || p.nombre_cliente || p.cliente || '—';
+      const total = Number(p.total_bs ?? p.total ?? 0).toFixed(2);
+      const pago = p.metodo_pago || '—';
+      const estPago = p.estado_pago || '—';
+      const estPed = p.estado_pedido || p.estado || '—';
+      const entrega = p.tipo_entrega || p.modalidad_entrega || '—';
+
+      return `
+        <tr>
+          <td><strong>${codigo}</strong></td>
+          <td>${fecha}</td>
+          <td>${cliente}</td>
+          <td style="text-align:right">${total}</td>
+          <td>${pago}</td>
+          <td><span class="badge">${estPago}</span></td>
+          <td><span class="badge">${estPed}</span></td>
+          <td>${entrega}</td>
+          <td class="no-print">
+            <button type="button" class="btn btn-sm btn-ver-comp-op" data-id="${id}" style="padding:4px 8px;font-size:0.75rem">📄 Ver</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    tbody.querySelectorAll('.btn-ver-comp-op').forEach((btn) => {
+      btn.addEventListener('click', () => abrirComprobanteOperador(btn.dataset.id));
+    });
+
+    if (infoPag) infoPag.textContent = `Página ${opPaginaActual} de ${opTotalPaginas}`;
+    actualizarBotonesPagOp();
+  } catch (err) {
+    console.error('Error cargando ventas de almacén:', err);
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:24px;color:#C0392B">Error al cargar ventas: ${err?.data?.mensaje || err.message}</td></tr>`;
+  }
+}
+
+function actualizarBotonesPagOp() {
+  const prev = document.getElementById('btnOpPrevPage');
+  const next = document.getElementById('btnOpNextPage');
+  if (prev) prev.disabled = opPaginaActual <= 1;
+  if (next) next.disabled = opPaginaActual >= opTotalPaginas;
+}
+
+async function abrirComprobanteOperador(pedidoId) {
+  const backdrop = document.getElementById('backdropComprobanteOp');
+  const cuerpo = document.getElementById('cuerpoComprobanteOp');
+  if (!backdrop || !cuerpo) return;
+
+  cuerpo.innerHTML = '<p style="text-align:center;padding:16px">Cargando comprobante...</p>';
+  backdrop.hidden = false;
+
+  try {
+    const data = await API.Planilla.obtenerComprobante(pedidoId);
+    const comp = data?.comprobante || data?.data || data;
+    cuerpo.innerHTML = `
+      <div style="line-height:1.6">
+        <p><strong>Código:</strong> ${comp.codigo || pedidoId}</p>
+        <p><strong>Cliente:</strong> ${comp.cliente_nombre || comp.cliente || '—'}</p>
+        <p><strong>Estado del pedido:</strong> ${comp.estado_pedido || '—'}</p>
+        <p><strong>Total (Bs.):</strong> ${Number(comp.total_bs ?? comp.total ?? 0).toFixed(2)}</p>
+      </div>
+    `;
+  } catch (err) {
+    cuerpo.innerHTML = `<p style="color:#C0392B">No se pudo cargar el comprobante: ${err?.data?.mensaje || err.message}</p>`;
+  }
+}
+
+async function cargarDespachosAlmacen(usuario) {
+  const tbody = document.getElementById('tablaOpDespachosCuerpo');
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px">Cargando órdenes...</td></tr>`;
+
+  try {
+    const filtros = usuario?.almacen_id ? { almacen_id: usuario.almacen_id } : {};
+    const resp = await API.Pedidos.listar(filtros);
+    const pedidos = resp?.data || resp?.pedidos || resp?.items || [];
+
+    if (!Array.isArray(pedidos) || pedidos.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:#9A7B73">No hay órdenes de despacho asignadas a este almacén.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = pedidos.map((p) => {
+      const id = p.id || p.pedido_id;
+      const codigo = p.codigo || p.numero_pedido || `#${id}`;
+      const fecha = (p.fecha_creacion || p.created_at || '').toString().slice(0, 10);
+      const cliente = p.cliente_nombre || p.nombre_cliente || '—';
+      const total = Number(p.total_bs ?? p.total ?? 0).toFixed(2);
+      const estPago = p.estado_pago || '—';
+      const estPed = p.estado_pedido || p.estado || '—';
+      const entrega = p.tipo_entrega || p.modalidad_entrega || '—';
+
+      let siguienteEstado = '';
+      let textoBoton = '';
+      if (estPed === 'PAGADO') {
+        siguienteEstado = 'EN_PREPARACION';
+        textoBoton = 'Preparar';
+      } else if (estPed === 'EN_PREPARACION') {
+        siguienteEstado = 'LISTO_DESPACHO';
+        textoBoton = 'Listo p/ Despacho';
+      } else if (estPed === 'LISTO_DESPACHO') {
+        siguienteEstado = 'DESPACHADO';
+        textoBoton = 'Despachar';
+      }
+
+      const accionHtml = siguienteEstado
+        ? `<button type="button" class="btn btn-sm btn-primary btn-avanzar-ped" data-id="${id}" data-estado="${siguienteEstado}" style="padding:4px 10px;font-size:0.75rem">${textoBoton}</button>`
+        : `<span class="text-muted" style="font-size:0.8rem">${estPed}</span>`;
+
+      return `
+        <tr>
+          <td><strong>${codigo}</strong></td>
+          <td>${fecha}</td>
+          <td>${cliente}</td>
+          <td style="text-align:right">${total}</td>
+          <td><span class="badge">${estPago}</span></td>
+          <td><span class="badge">${estPed}</span></td>
+          <td>${entrega}</td>
+          <td>${accionHtml}</td>
+        </tr>
+      `;
+    }).join('');
+
+    tbody.querySelectorAll('.btn-avanzar-ped').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try {
+          await API.Pedidos.cambiarEstado(btn.dataset.id, { estado_pedido: btn.dataset.estado });
+          await cargarDespachosAlmacen(usuario);
+          await cargarVentasAlmacen(usuario);
+        } catch (err) {
+          alert('❌ ' + (err?.data?.mensaje || err.message));
+          btn.disabled = false;
+        }
+      });
+    });
+  } catch (err) {
+    console.error('Error cargando despachos:', err);
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:#C0392B">Error al cargar despachos: ${err?.data?.mensaje || err.message}</td></tr>`;
+  }
+}
+
+async function cargarAlertas() {
+  try {
+    const res = await API.consultarAlertasInventario();
+    const cardAlertas = document.getElementById('cardAlertasInventario');
+    const body = document.getElementById('contenedorAlertasBody');
+
+    const totalStockBajo = res.resumen?.total_alertas_stock || 0;
+    const totalVenc = res.resumen?.total_alertas_vencimiento || 0;
+
+    document.getElementById('statStockBajo').textContent = totalStockBajo;
+    document.getElementById('statVencimientos').textContent = totalVenc;
+
+    if (totalStockBajo === 0 && totalVenc === 0) {
+      cardAlertas.style.display = 'none';
+      return;
+    }
+
+    cardAlertas.style.display = 'block';
+    let html = '';
+
+    if (totalStockBajo > 0) {
+      html += `<div style="margin-bottom:12px"><strong>Existencias por debajo del stock mínimo (${totalStockBajo}):</strong><ul style="margin-top:6px;padding-left:20px">`;
+      res.stock_bajo.forEach(a => {
+        html += `<li style="color:#C0392B">${a.sku} - ${a.nombre}: <strong>${a.stock_disponible}</strong> unidades (Mín: ${a.stock_minimo})</li>`;
+      });
+      html += `</ul></div>`;
+    }
+
+    if (totalVenc > 0) {
+      html += `<div><strong>Lotes con vencimiento próximo o cumplido (${totalVenc}):</strong><ul style="margin-top:6px;padding-left:20px">`;
+      res.vencimientos_proximos.forEach(v => {
+        html += `<li style="color:#B7791F">Lote <code>${v.lote_codigo}</code> (${v.producto_nombre}): vence el <strong>${v.fecha_vencimiento}</strong> (${v.cantidad} unidades, ${v.dias_restantes} días)</li>`;
+      });
+      html += `</ul></div>`;
+    }
+
+    body.innerHTML = html;
+  } catch (err) {
+    console.error('Error cargando alertas:', err);
+  }
+}
+
+function actualizarStats() {
+  const total = inventarioLocal.length;
+  const disponibles = inventarioLocal.filter(i => i.estado_stock === 'Disponible').length;
+
+  document.getElementById('statTotalItems').textContent = total;
+  document.getElementById('statDisponibles').textContent = disponibles;
+}
+
+function renderTablaInventario() {
+  const tbody = document.getElementById('tbodyInventario');
+  const txtFiltro = (document.getElementById('filtroInventarioTexto')?.value || '').toLowerCase().trim();
+  const estFiltro = document.getElementById('filtroInventarioEstado')?.value || 'todos';
+
+  const filtrados = inventarioLocal.filter(item => {
+    if (estFiltro !== 'todos' && item.estado_stock !== estFiltro) return false;
+    if (txtFiltro) {
+      const matchSku = (item.sku || '').toLowerCase().includes(txtFiltro);
+      const matchNom = (item.nombre || '').toLowerCase().includes(txtFiltro);
+      if (!matchSku && !matchNom) return false;
+    }
+    return true;
+  });
+
+  if (filtrados.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:#9A7B73">No se encontraron productos en el inventario.</td></tr>`;
+    return;
+  }
+
+  let html = '';
+  filtrados.forEach(i => {
+    let badgeClass = 'badge--success';
+    if (i.estado_stock === 'Pocas unidades') badgeClass = 'badge--warning';
+    if (i.estado_stock === 'Agotado') badgeClass = 'badge--danger';
+
+    html += `
+      <tr>
+        <td><code>${i.sku}</code></td>
+        <td><strong>${i.nombre}</strong></td>
+        <td>${i.categoria_nombre || '—'}</td>
+        <td style="text-align:right">${i.stock_actual}</td>
+        <td style="text-align:right;color:#9A7B73">${i.stock_reservado}</td>
+        <td style="text-align:right"><strong>${i.stock_disponible}</strong></td>
+        <td style="text-align:center"><span class="badge ${badgeClass}">${i.estado_stock}</span></td>
+        <td style="text-align:center">
+          <button class="btn btn-sm btn-ajuste-fila" data-id="${i.producto_id}" style="padding:4px 8px;font-size:0.75rem;background:#F5EFEB">
+            Ajustar
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+
+  tbody.querySelectorAll('.btn-ajuste-fila').forEach(btn => {
+    btn.addEventListener('click', () => {
+      abrirModalAjustePara(btn.dataset.id);
+    });
+  });
+}
+
+// Filtros y refresco
+document.getElementById('filtroInventarioTexto')?.addEventListener('input', renderTablaInventario);
+document.getElementById('filtroInventarioEstado')?.addEventListener('change', renderTablaInventario);
+document.getElementById('btnRefrescarInventario')?.addEventListener('click', async () => {
+  await cargarInventario();
+  await cargarAlertas();
+  showAlert('alertaInventarioMsg', 'Inventario actualizado.', 'success');
+});
+
+// Modal Entrada
+const modalEntrada = document.getElementById('modalEntrada');
+document.getElementById('btnAbrirModalEntrada')?.addEventListener('click', () => {
+  document.getElementById('formEntradaInventario').reset();
+  document.getElementById('alertaModalEntrada').hidden = true;
+  modalEntrada.hidden = false;
+});
+document.getElementById('btnCerrarModalEntrada')?.addEventListener('click', () => modalEntrada.hidden = true);
+document.getElementById('btnCancelarModalEntrada')?.addEventListener('click', () => modalEntrada.hidden = true);
+
+document.getElementById('formEntradaInventario')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btnSubmitEntrada');
+  btn.disabled = true;
+
+  try {
+    const payload = {
+      producto_id: document.getElementById('entradaProducto').value,
+      cantidad: document.getElementById('entradaCantidad').value,
+      lote_codigo: document.getElementById('entradaLoteCodigo').value,
+      fecha_vencimiento: document.getElementById('entradaFechaVence').value,
+      motivo: document.getElementById('entradaMotivo').value || 'Entrada regular a almacén'
+    };
+
+    await API.registrarEntradaInventario(payload);
+    modalEntrada.hidden = true;
+    await cargarInventario();
+    await cargarAlertas();
+    alert('✅ Entrada de mercadería registrada correctamente.');
+  } catch (err) {
+    showAlert('alertaModalEntrada', '❌ ' + (err?.data?.error || err.message), 'danger');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// Modal Ajuste
+const modalAjuste = document.getElementById('modalAjuste');
+function abrirModalAjustePara(prodId = '') {
+  document.getElementById('formAjusteInventario').reset();
+  if (prodId) document.getElementById('ajusteProducto').value = prodId;
+  document.getElementById('alertaModalAjuste').hidden = true;
+  modalAjuste.hidden = false;
+}
+document.getElementById('btnAbrirModalAjuste')?.addEventListener('click', () => abrirModalAjustePara());
+document.getElementById('btnCerrarModalAjuste')?.addEventListener('click', () => modalAjuste.hidden = true);
+document.getElementById('btnCancelarModalAjuste')?.addEventListener('click', () => modalAjuste.hidden = true);
+
+document.getElementById('formAjusteInventario')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btnSubmitAjuste');
+  btn.disabled = true;
+
+  try {
+    const tipo = document.getElementById('ajusteTipo').value;
+    const cantNum = Math.abs(Number(document.getElementById('ajusteCantidad').value));
+    const delta = tipo === 'negativo' ? -cantNum : cantNum;
+
+    const payload = {
+      producto_id: document.getElementById('ajusteProducto').value,
+      cantidad_delta: delta,
+      motivo: document.getElementById('ajusteMotivo').value
+    };
+
+    await API.registrarAjusteInventario(payload);
+    modalAjuste.hidden = true;
+    await cargarInventario();
+    await cargarAlertas();
+    alert('✅ Ajuste de inventario aplicado exitosamente.');
+  } catch (err) {
+    showAlert('alertaModalAjuste', '❌ ' + (err?.data?.error || err.message), 'danger');
+  } finally {
+    btn.disabled = false;
+  }
 });
 
 document.getElementById('perfilForm')?.addEventListener('submit', async e => {

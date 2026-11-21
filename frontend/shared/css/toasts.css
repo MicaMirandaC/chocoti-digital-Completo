@@ -1,0 +1,165 @@
+/**
+ * toasts.css — Sistema Universal de Notificaciones Toast Reutilizable
+ * ChocoTi-Digital · Solur S.R.L. · Sucre, Bolivia
+ * Accesible, sin duplicados, apilable (máx 3), cierre automático con pausa al mouse.
+ */
+
+:root {
+  --toast-zindex: 10000;
+  --toast-bg-success: #15803D;
+  --toast-bg-error: #B91C1C;
+  --toast-bg-warning: #B45309;
+  --toast-bg-info: #1D4ED8;
+  --toast-text: #FFFFFF;
+}
+
+/* Contenedor fijo de toasts */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: var(--toast-zindex);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 380px;
+  width: calc(100% - 32px);
+  pointer-events: none;
+}
+
+/* Tarjeta individual de Toast */
+.toast-item {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  color: var(--toast-text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.toast-item.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-item.leaving {
+  opacity: 0;
+  transform: translateX(50px);
+}
+
+/* Variantes de Color */
+.toast-item--success {
+  background: var(--toast-bg-success);
+  border-left: 5px solid #86EFAC;
+}
+
+.toast-item--error {
+  background: var(--toast-bg-error);
+  border-left: 5px solid #FCA5A5;
+}
+
+.toast-item--warning {
+  background: var(--toast-bg-warning);
+  border-left: 5px solid #FDE68A;
+}
+
+.toast-item--info {
+  background: var(--toast-bg-info);
+  border-left: 5px solid #93C5FD;
+}
+
+/* Icono del Toast */
+.toast-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Contenido de texto */
+.toast-body {
+  flex: 1;
+  word-break: break-word;
+}
+
+.toast-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+  opacity: 0.9;
+}
+
+.toast-message {
+  margin: 0;
+}
+
+/* Botón de Cierre */
+.toast-close {
+  background: transparent;
+  border: none;
+  color: var(--toast-text);
+  opacity: 0.7;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.toast-close:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.toast-close:focus {
+  outline: 2px solid white;
+  border-radius: 4px;
+}
+
+/* Barra de progreso de tiempo */
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.4);
+  width: 100%;
+  transform-origin: left;
+  animation: toastProgress linear forwards;
+}
+
+.toast-item:hover .toast-progress {
+  animation-play-state: paused;
+}
+
+@keyframes toastProgress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* Adaptabilidad móvil */
+@media (max-width: 600px) {
+  .toast-container {
+    top: 12px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+}

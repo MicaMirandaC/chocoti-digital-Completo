@@ -37,19 +37,42 @@ El proyecto respeta una separación estricta de responsabilidades:
 
 ---
 
-## 👥 2. Credenciales de Prueba (Mock Data de los 4 Roles)
+## 👥 2. Credenciales de Prueba (Mock Data de los 7 Roles Oficiales)
 
-El sistema incluye cuentas semilla listas para usar en cada rol:
+El sistema incluye cuentas semilla listas para validar el control de acceso basado en roles (RBAC) y la matriz de transiciones de pedidos:
 
-| Icono | Rol del Sistema | Correo Electrónico | Contraseña | Almacén / Tipo de Cuenta |
+| Icono | Rol del Sistema | Correo Electrónico | Contraseña | Almacén Asignado / Alcance |
 | :---: | :--- | :--- | :--- | :--- |
-| 👑 | **ADMINISTRADOR** | `admin@chocolatesti.bo` | `Admin2024!` | Planta Central Sucre (`INTERNO`) |
+| 👑 | **ADMINISTRADOR** | `admin@chocolatesti.bo` | `Admin2024!` | Acceso Global Multisucursal (`INTERNO`) |
 | 🏭 | **OPERADOR_ALMACEN** | `operador.sucre@chocolatesti.bo` | `Operador2024!` | Planta Central Sucre (`INTERNO`) |
 | 🏢 | **OPERADOR_ALMACEN** | `operador.lapaz@chocolatesti.bo` | `Operador2024!` | Agencia La Paz (`INTERNO`) |
 | 🛍️ | **CLIENTE_MINORISTA** | `cliente@gmail.com` | `Cliente2024!` | Consumidor Final (`MINORISTA`) |
 | 🏛️ | **CLIENTE_CORPORATIVO** | `empresa@acme.bo` | `Empresa2024!` | ACME Distribuidora S.R.L. (`CORPORATIVO`) |
+| 📋 | **PREPARADOR_PEDIDOS** | `preparador.sucre@chocolatesti.bo` | `Preparador2024!` | Planta Central Sucre (`INTERNO` - Picking FEFO) |
+| 📦 | **EMPACADOR** | `empacador.sucre@chocolatesti.bo` | `Empacador2024!` | Planta Central Sucre (`INTERNO` - Control Embalaje) |
+| 🚚 | **DESPACHADOR_ENTREGA** | `despachador.sucre@chocolatesti.bo` | `Despachador2024!` | Planta Central Sucre (`INTERNO` - Courier y Retiro) |
 
-> 💡 **Tip:** Tanto en el modal de login de `index.html` como en `frontend/auth/login.html`, existen botones de auto-rellenado para probar cada cuenta con un solo clic.
+> 🔒 **Regla Estricta de Seguridad (ajustes_ingeniero.md):**
+> Las contraseñas y cuentas de prueba **SOLO se documentan en este archivo `README.md`**. Están terminantemente prohibidas en pantallas de login, botones de auto-rellenado ("cred-pills") o placeholders dentro del frontend para cumplir con las normas de seguridad informática de la materia.
+
+---
+
+## 💳 2.1 Configuración de Pasarela Internacional (PayPal Sandbox)
+
+Para habilitar pagos con PayPal en moneda internacional (USD con conversión automática desde BOB a tasa 6.96):
+
+1. **Crear App en PayPal Developer:**
+   - Iniciar sesión en [PayPal Developer Dashboard](https://developer.paypal.com/).
+   - En *Apps & Credentials*, crear una aplicación bajo el modo **Sandbox**.
+2. **Variables de Entorno (`.env`):**
+   ```env
+   PAYPAL_ENV=sandbox
+   PAYPAL_CLIENT_ID=tu_client_id_sandbox
+   PAYPAL_CLIENT_SECRET=tu_client_secret_sandbox
+   TIPO_CAMBIO_USD=6.96
+   ```
+3. **Cuentas de Prueba Sandbox:**
+   - En *Sandbox Accounts* de PayPal Developer, crear una cuenta de tipo *Personal (Buyer)* con saldo ficticio en USD para simular pagos desde la pasarela sin dinero real.
 
 ---
 
